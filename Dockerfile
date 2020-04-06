@@ -19,6 +19,7 @@ RUN go mod download
 COPY . .
 RUN go build -o /superhero
 
+
 #    ______ _             _ 
 #   |  ____(_)           | |
 #   | |__   _ _ __   __ _| |
@@ -31,6 +32,12 @@ FROM alpine:3.11 as final
 
 ENV PORT=8080
 ENV GIN_MODE=release
+
+# ENV DB_HOST=db
+# ENV DB_PORT=
+# ENV DB_NAME=
+# ENV DB_USER=
+# ENV DB_PASS=
 
 COPY --from=builder /superhero /superhero
 

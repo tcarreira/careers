@@ -1,9 +1,26 @@
 version: '3'
 services:
   api:
-    image: tcarreira/superhero:latest
+    image: superhero-api-go:latest
     build: .
     ports:
       - "8080:8080"
     environment:
       GIN_MODE: debug
+      DB_HOST: db
+      DB_NAME: supers
+      DB_USER: supersuser
+      DB_PASS: superspassword
+
+  db:
+    image: postgres:12-alpine
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: supers
+      POSTGRES_USER: supersuser
+      POSTGRES_PASSWORD: superspassword
+    
+volumes:
+  pgdata:
