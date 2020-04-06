@@ -20,7 +20,7 @@ This is being made in the context of https://github.com/levpay/careers#desafio
 
 - [X] Create Repository and setup Go
 - [X] GIN hello world
-- [ ] Setup docker (it will be easier for Database integration)
+- [X] Setup docker (it will be easier for Database integration)
 - [ ] Add Postgres and go-pg
 - [ ] Setup go-flag for command-line admin (create db-schema)
 - [ ] Create new Super (Hero/Vilan)

@@ -1,0 +1,9 @@
+version: '3'
+services:
+  api:
+    image: tcarreira/superhero:latest
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      GIN_MODE: debug
