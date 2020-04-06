@@ -1,26 +1,23 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/go-pg/pg"
 )
 
-func setRoutes(r *gin.Engine) *gin.Engine {
-
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"data": "hello world"})
-	})
-
-	return r
-}
-
-func setupRouter() *gin.Engine {
-	r := gin.Default()
-
-	return setRoutes(r)
+// Server stores both Database and HTTP Server connectors
+type Server struct {
+	DB     *pg.DB
+	Router *gin.Engine
 }
 
 func main() {
-	setupRouter().Run()
+	s := Server{}
+
+	s.setupRouter()
+
+	s.setupDatabase()
+	defer s.DB.Close()
+
+	s.Router.Run()
 }
