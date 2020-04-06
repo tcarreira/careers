@@ -1,7 +1,7 @@
 version: '3'
 services:
   api:
-    image: superhero-api-go:latest
+    image: tcarreira/superhero:latest
     build: .
     ports:
       - "8080:8080"
@@ -11,6 +11,8 @@ services:
       DB_NAME: supers
       DB_USER: supersuser
       DB_PASS: superspassword
+    command:
+      - serve
 
   db:
     image: postgres:12-alpine

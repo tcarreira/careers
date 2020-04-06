@@ -14,10 +14,8 @@ type Server struct {
 func main() {
 	s := Server{}
 
-	s.setupRouter()
-
 	s.setupDatabase()
 	defer s.DB.Close()
 
-	s.Router.Run()
+	s.parseCommandLine()
 }

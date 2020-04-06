@@ -17,8 +17,7 @@ COPY go.sum .
 RUN go mod download
 
 COPY . .
-RUN go build -o /superhero
-
+RUN CGO_ENABLED=0 go build -o /superhero
 
 #    ______ _             _ 
 #   |  ____(_)           | |
@@ -28,7 +27,7 @@ RUN go build -o /superhero
 #   |_|    |_|_| |_|\__,_|_|
 #                           
 #                           
-FROM alpine:3.11 as final
+FROM scratch as final
 
 ENV PORT=8080
 ENV GIN_MODE=release

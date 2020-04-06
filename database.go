@@ -36,3 +36,15 @@ func (s *Server) setupDatabase() *Server {
 
 	return s
 }
+
+// DBCreateSchema creates database schema. Intended to be called by an admin command
+func (s *Server) DBCreateSchema() {
+	fmt.Println("This will create Database schema")
+	return
+}
+
+// DBMigrate performs database migrations
+func (s *Server) DBMigrate() {
+	fmt.Println("This will perform Database migrations")
+	return
+}

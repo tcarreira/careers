@@ -22,3 +22,8 @@ func (s *Server) setupRouter() *Server {
 
 	return s
 }
+
+func (s *Server) runHTTPServer() {
+	s.setupRouter()
+	s.Router.Run()
+}
