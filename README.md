@@ -19,8 +19,7 @@ This is being made in the context of https://github.com/levpay/careers#desafio
 # TODO
 
 - [X] Create Repository and setup Go
-- [ ] Simple hello world
-- [ ] GIN hello world
+- [X] GIN hello world
 - [ ] Setup docker (it will be easier for Database integration)
 - [ ] Add Postgres and go-pg
 - [ ] Setup go-flag for command-line admin (create db-schema)
