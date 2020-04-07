@@ -119,6 +119,32 @@ func TestSuper_getByNameOrUUID_notExists(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestSuper_DeleteByNameOrUUID_byName(t *testing.T) {
+	var super *Super
+	var err error
+
+	err = super.DeleteByNameOrUUID(s.DB, "Test1")
+	assert.NoError(t, err)
+
+	// Try again the same
+	err = super.DeleteByNameOrUUID(s.DB, "Test1")
+	assert.Error(t, err)
+	assert.IsType(t, &errorSuperNotFound{""}, err)
+}
+
+func TestSuper_DeleteByNameOrUUID_byUUID(t *testing.T) {
+	var super *Super
+	var err error
+
+	err = super.DeleteByNameOrUUID(s.DB, "47c0df01-a47d-497f-808d-181021f01c76")
+	assert.NoError(t, err)
+
+	// Try again the same
+	err = super.DeleteByNameOrUUID(s.DB, "47c0df01-a47d-497f-808d-181021f01c76")
+	assert.Error(t, err)
+	assert.IsType(t, &errorSuperNotFound{""}, err)
+}
+
 func TestSuper_ReadAll_1(t *testing.T) {
 	var got []Super
 	var err error

@@ -104,8 +104,24 @@ func (api *SuperAPI) supersPUTHandler(c *gin.Context) {
 }
 
 func (api *SuperAPI) supersDeleteHandler(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, errorResponseJSON{
-		"Not Implemented",
-		"supersDeleteHandler WIP",
-	})
+	super := new(Super)
+	err := super.DeleteByNameOrUUID(api.DB, c.Param("id"))
+
+	if err != nil {
+		if _, ok := err.(*errorSuperNotFound); ok {
+			// nothing was deleted - return 404
+			c.JSON(http.StatusNotFound, errorResponseJSON{
+				"Super Not Found",
+				err.Error(),
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, errorResponseJSON{
+				"Unexpected Error",
+				err.Error(),
+			})
+		}
+	} else {
+		// Deleted. No Content is needed
+		c.Status(http.StatusNoContent)
+	}
 }

@@ -152,6 +152,28 @@ func (s *Super) Update(db *pg.DB) *Super {
 	return s
 }
 
+// DeleteByNameOrUUID deletes Super from database, using name or uuid
+func (s *Super) DeleteByNameOrUUID(db *pg.DB, idStr string) error {
+
+	res, err := db.Model(&Super{}).
+		Where("name = ?", idStr).
+		WhereOr("upper(uuid::text) = ?", strings.ToUpper(idStr)).
+		Delete()
+
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return &errorSuperNotFound{err.Error()}
+		}
+		return err
+	}
+	if res.RowsAffected() < 1 {
+		return &errorSuperNotFound{"Can't delete Super - Not Found"}
+	}
+
+	return nil
+}
+
 // Delete a super from database
 func (s *Super) Delete(db *pg.DB) {
+
 }
