@@ -27,5 +27,6 @@ func TestDBCreateSchema(t *testing.T) {
 	s := new(Server)
 	s.setupDatabase()
 
+	s.dbDropSchema()
 	s.DBCreateSchema()
 }

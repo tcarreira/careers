@@ -39,10 +39,10 @@ func (s *Server) setupDatabase() *Server {
 }
 
 // DBCreateSchema creates database schema. Intended to be called by an admin command
-func (s *Server) DBCreateSchema() {
+func (s *Server) DBCreateSchema() *Server {
 
 	// activate pgcrypto in order to use gen_random_uuid()
-	if _, err := s.DB.Exec("CREATE EXTENSION pgcrypto;"); err != nil {
+	if _, err := s.DB.Exec("CREATE EXTENSION IF NOT EXISTS pgcrypto;"); err != nil {
 		panic(err)
 	}
 
@@ -55,9 +55,29 @@ func (s *Server) DBCreateSchema() {
 		}
 	}
 
+	return s
+}
+
+// dbDropSchema should be used only by tests
+func (s *Server) dbDropSchema() *Server {
+	for _, model := range []interface{}{(*Super)(nil)} {
+		fmt.Printf("DROPing table for %T\n", model)
+		err := s.DB.DropTable(model, &orm.DropTableOptions{IfExists: true})
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(2)
+		}
+	}
+	return s
 }
 
 // DBMigrate performs database migrations (not implemented)
 func (s *Server) DBMigrate() {
 	fmt.Println("This will perform Database migrations")
+}
+
+// setupTestDatabase should be used only by tests
+func (s *Server) setupEmptyTestDatabase() *Server {
+	s.setupDatabase().dbDropSchema().DBCreateSchema() // first run with empty db
+	return s
 }
