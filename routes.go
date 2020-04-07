@@ -14,11 +14,13 @@ func setRoutes(r *gin.Engine) *gin.Engine {
 
 	v1 := r.Group("/api/v1")
 	{
-		v1.POST("/supers", supersPOSTHandler)
-		v1.GET("/supers", supersGETHandler)
-		v1.GET("/supers/:id", supersGETHandler)
-		v1.PUT("/supers/:id", supersPUTHandler)
-		v1.DELETE("/supers/:id", supersDeleteHandler)
+		api := new(SuperAPI)
+
+		v1.POST("/supers", api.supersPOSTHandler)
+		v1.GET("/supers", api.supersGETHandler)
+		v1.GET("/supers/:id", api.supersGETHandler)
+		v1.PUT("/supers/:id", api.supersPUTHandler)
+		v1.DELETE("/supers/:id", api.supersDeleteHandler)
 	}
 
 	return r
