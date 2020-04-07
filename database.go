@@ -41,6 +41,11 @@ func (s *Server) setupDatabase() *Server {
 // DBCreateSchema creates database schema. Intended to be called by an admin command
 func (s *Server) DBCreateSchema() {
 
+	// activate pgcrypto in order to use gen_random_uuid()
+	if _, err := s.DB.Exec("CREATE EXTENSION pgcrypto;"); err != nil {
+		panic(err)
+	}
+
 	for _, model := range []interface{}{(*Super)(nil)} {
 		fmt.Printf("Creating table for %T\n", model)
 		err := s.DB.CreateTable(model, &orm.CreateTableOptions{IfNotExists: true})

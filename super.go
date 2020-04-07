@@ -15,13 +15,13 @@ type SuperInterface interface {
 
 // Super represents either a SuperHero or a SuperVilan
 type Super struct {
-	Type         string `json:"type"`
-	ID           int64  `json:"id"`
-	Name         string `json:"name"`
-	UUID         string `json:"uuid"`
+	Type         string `json:"type" form:"type"`
+	ID           uint64 `json:"id" sql:",pk"`
+	Name         string `json:"name" form:"name" sql:",unique,notnull"`
+	UUID         string `json:"uuid" form:"uuid" sql:",notnull,type:uuid,default:gen_random_uuid()"`
 	FullName     string `json:"fullname"`
-	Intelligence string `json:"intelligence"`
-	Power        string `json:"power"`
+	Intelligence int64  `json:"intelligence"`
+	Power        int64  `json:"power"`
 	Occupation   string `json:"occupation"`
 	ImageURL     string `json:"image_url"`
 }

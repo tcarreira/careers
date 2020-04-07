@@ -40,8 +40,8 @@ func (api *SuperAPI) supersPOSTHandler(c *gin.Context) {
 	if _, err := super.Create(api.DB); err != nil {
 		if _, ok := err.(*errorSuperAlreadyExists); ok {
 			c.JSON(http.StatusConflict, errorResponseJSON{
+				"Super already exists - update it instead",
 				err.Error(),
-				"",
 			})
 		} else {
 			panic(err)
