@@ -6,8 +6,20 @@ import (
 	"path/filepath"
 )
 
-// printUsage prints usage
-func printUsage() {
+// CommandLiner is an interface for methods used by ParseCommandLine
+type CommandLiner interface {
+	usagePrint()
+	adminUsagePrint()
+	exit(ret int)
+	getArg(idx int) string
+	lenArgs() int
+}
+
+// CommandLine is an instance of CommandLiner
+type CommandLine struct{}
+
+// usagePrint prints usage
+func (c CommandLine) usagePrint() {
 	fmt.Println("Usage:", filepath.Base(os.Args[0]), "COMMAND")
 	fmt.Println("")
 	fmt.Println("COMMAND:")
@@ -15,8 +27,8 @@ func printUsage() {
 	fmt.Println("	serve: start HTTP server")
 }
 
-// printAdminUsage prints usage for admin sub-command
-func printAdminUsage() {
+// adminUsagePrint prints usage for admin sub-command
+func (c CommandLine) adminUsagePrint() {
 	fmt.Println("Usage:", filepath.Base(os.Args[0]), "admin", "COMMAND")
 	fmt.Println("")
 	fmt.Println("COMMAND:")
@@ -24,38 +36,60 @@ func printAdminUsage() {
 	fmt.Println("	migrate: perform database migrations (not implemented)")
 }
 
-// parseCommandLine will parse command line arguments/flags and return a callable function
-func (s *Server) parseCommandLine() {
+// exit just calls os.Exit()
+func (c CommandLine) exit(ret int) {
+	os.Exit(ret)
+}
 
-	if len(os.Args) < 2 {
-		printUsage()
-		os.Exit(1)
-	}
+// getArg gets os.Args[idx]
+func (c CommandLine) getArg(idx int) string {
+	return os.Args[idx]
+}
 
-	switch os.Args[1] {
+// getArg gets os.Args[idx]
+func (c CommandLine) lenArgs() int {
+	return len(os.Args)
+}
 
-	case "serve":
-		s.runHTTPServer()
+func parseCommandLine(comm CommandLiner, s *Server) {
 
-	case "admin":
-		if len(os.Args) < 3 {
-			printAdminUsage()
-			os.Exit(1)
-		}
+	if comm.lenArgs() < 2 {
+		comm.usagePrint()
+		comm.exit(1)
+	} else {
+		switch comm.getArg(1) {
 
-		switch os.Args[2] {
-		case "schema":
-			s.DBCreateSchema()
-		case "migrate":
-			s.DBMigrate()
+		case "serve":
+			s.runHTTPServer()
+
+		case "admin":
+			if comm.lenArgs() < 3 {
+				comm.adminUsagePrint()
+				comm.exit(1)
+			} else {
+
+				switch comm.getArg(2) {
+				case "schema":
+					s.DBCreateSchema()
+				case "migrate":
+					s.DBMigrate()
+				default:
+					comm.adminUsagePrint()
+					comm.exit(1)
+				}
+			}
+
 		default:
-			printAdminUsage()
-			os.Exit(1)
+			comm.usagePrint()
+			comm.exit(1)
 		}
-
-	default:
-		printUsage()
-		os.Exit(1)
-
 	}
+}
+
+// ParseCommandLine will parse command line arguments/flags and return a callable function
+func (s *Server) ParseCommandLine() {
+	var comm CommandLine
+	comm = CommandLine{}
+
+	parseCommandLine(comm, s)
 }

@@ -17,5 +17,5 @@ func main() {
 	s.setupDatabase()
 	defer s.DB.Close()
 
-	s.parseCommandLine()
+	s.ParseCommandLine()
 }
