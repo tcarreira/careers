@@ -80,10 +80,19 @@ func (api *SuperAPI) supersGETHandler(c *gin.Context) {
 		c.JSON(http.StatusOK, super)
 
 	} else {
-		c.JSON(http.StatusNotImplemented, errorResponseJSON{
-			"Not Implemented",
-			"supersGETHandler WIP",
-		})
+
+		sFilter := Super{}
+
+		if err := c.ShouldBind(&sFilter); err != nil {
+			c.JSON(http.StatusBadRequest, errorResponseJSON{
+				"Could not process Payload (query parameters)",
+				err.Error(),
+			})
+		} else {
+			results := sFilter.ReadAll(api.DB)
+			
+			c.JSON(http.StatusOK, results)
+		}
 	}
 }
 
