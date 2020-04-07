@@ -11,9 +11,12 @@ import (
 )
 
 func setupTestRouter() *gin.Engine {
+	s := Server{}
+
 	gin.SetMode(gin.TestMode)
-	r := gin.New()
-	return setRoutes(r)
+	s.Router = gin.New()
+
+	return setRoutes(&s)
 }
 
 func performRequest(r http.Handler, method, path string) *httptest.ResponseRecorder {
