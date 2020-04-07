@@ -67,6 +67,6 @@ DB_HOST=db DB_USER=user DB_PASS=pass go test -v ./... -tags sql
 - [ ] Create new Super (Hero/Vilan)
     - [X] Super structs
     - [X] POST
-    - [ ] GET
+    - [X] GET
 - [ ] GET filters (by type, name, uuid)
 - [ ] DELETE Super

@@ -36,7 +36,13 @@ func (e *errorSuperAlreadyExists) Error() string {
 	return e.s
 }
 
+type errorSuperNotFound struct {
+	s string
+}
 
+func (e *errorSuperNotFound) Error() string {
+	return e.s
+}
 
 type errorSuperInvalidFields struct {
 	s string
@@ -45,6 +51,7 @@ type errorSuperInvalidFields struct {
 func (e *errorSuperInvalidFields) Error() string {
 	return e.s
 }
+
 func (s *Super) validate() (*Super, error) {
 
 	// Check Type is one of HERO|VILAN (should be enum...)
@@ -77,6 +84,24 @@ func (s *Super) Create(db *pg.DB) (*Super, error) {
 	}
 
 	return s, nil
+}
+
+func (s *Super) getByNameOrUUID(db *pg.DB, idStr string) (*Super, error) {
+	super := Super{}
+
+	err := db.Model(&Super{}).
+		Where("name = ?", idStr).
+		WhereOr("upper(uuid::text) = ?", strings.ToUpper(idStr)).
+		Select(&super)
+
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return &super, &errorSuperNotFound{err.Error()}
+		}
+		return &super, err
+	}
+
+	return &super, nil
 }
 
 // Read queries one Super from database

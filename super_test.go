@@ -79,3 +79,63 @@ func TestSuper_Create_2(t *testing.T) {
 	assert.Equal(t, "url", got.ImageURL)
 
 }
+
+func TestSuper_getByNameOrUUID_byUUID(t *testing.T) {
+	var got *Super
+	var err error
+
+	got, err = got.getByNameOrUUID(s.DB, "47c0df01-a47d-497f-808d-181021f01c76")
+	assert.NoError(t, err)
+	assert.Equal(t, "VILAN", got.Type)
+	assert.Equal(t, "super2", got.Name)
+}
+
+func TestSuper_getByNameOrUUID_byName(t *testing.T) {
+	var got *Super
+	var err error
+
+	got, err = got.getByNameOrUUID(s.DB, "Test1")
+	assert.NoError(t, err)
+	assert.Equal(t, "HERO", got.Type)
+	assert.Equal(t, "Test1", got.Name)
+}
+
+func TestSuper_Delete(t *testing.T) {
+	type fields struct {
+		Type         string
+		ID           uint64
+		Name         string
+		UUID         string
+		FullName     string
+		Intelligence int64
+		Power        int64
+		Occupation   string
+		ImageURL     string
+	}
+	type args struct {
+		db *pg.DB
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &Super{
+				Type:         tt.fields.Type,
+				ID:           tt.fields.ID,
+				Name:         tt.fields.Name,
+				UUID:         tt.fields.UUID,
+				FullName:     tt.fields.FullName,
+				Intelligence: tt.fields.Intelligence,
+				Power:        tt.fields.Power,
+				Occupation:   tt.fields.Occupation,
+				ImageURL:     tt.fields.ImageURL,
+			}
+			s.Delete(tt.args.db)
+		})
+	}
+}

@@ -52,11 +52,39 @@ func (api *SuperAPI) supersPOSTHandler(c *gin.Context) {
 
 }
 
+// supersGETHandler handles GET Requests.
+// Valid requests:
+// 	GET /supers/name
+// 	GET /supers/uuid
 func (api *SuperAPI) supersGETHandler(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, errorResponseJSON{
-		"Not Implemented",
-		"supersGETHandler WIP",
-	})
+
+	if c.Param("id") != "" { // Searching for a specific user (by name or uuid)
+		var super *Super
+		var err error
+
+		super, err = super.getByNameOrUUID(api.DB, c.Param("id"))
+		if err != nil {
+			if _, ok := err.(*errorSuperNotFound); ok {
+				c.JSON(http.StatusNotFound, errorResponseJSON{
+					"No Super was found",
+					err.Error(),
+				})
+			} else {
+				c.JSON(http.StatusInternalServerError, errorResponseJSON{
+					"Internal Server Error",
+					err.Error(),
+				})
+			}
+		}
+
+		c.JSON(http.StatusOK, super)
+
+	} else {
+		c.JSON(http.StatusNotImplemented, errorResponseJSON{
+			"Not Implemented",
+			"supersGETHandler WIP",
+		})
+	}
 }
 
 func (api *SuperAPI) supersPUTHandler(c *gin.Context) {
