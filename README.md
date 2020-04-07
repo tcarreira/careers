@@ -63,9 +63,9 @@ DB_HOST=db DB_USER=user DB_PASS=pass go test -v ./... -tags sql
 - [X] GIN hello world
 - [X] Setup docker (it will be easier for Database integration)
 - [X] Add Postgres and go-pg
-- [ ] Setup go-flag for command-line admin (create db-schema)
+- [X] Setup command-line admin (create db-schema)
 - [ ] Create new Super (Hero/Vilan)
-    - [ ] Super Class
+    - [X] Super structs
     - [ ] POST
     - [ ] GET
 - [ ] GET filters (by type, name, uuid)

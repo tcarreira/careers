@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
 )
 
 func getEnv(key, fallback string) string {
@@ -39,12 +40,19 @@ func (s *Server) setupDatabase() *Server {
 
 // DBCreateSchema creates database schema. Intended to be called by an admin command
 func (s *Server) DBCreateSchema() {
-	fmt.Println("This will create Database schema")
-	return
+
+	for _, model := range []interface{}{(*Super)(nil)} {
+		fmt.Printf("Creating table for %T\n", model)
+		err := s.DB.CreateTable(model, &orm.CreateTableOptions{IfNotExists: true})
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(2)
+		}
+	}
+
 }
 
-// DBMigrate performs database migrations
+// DBMigrate performs database migrations (not implemented)
 func (s *Server) DBMigrate() {
 	fmt.Println("This will perform Database migrations")
-	return
 }

@@ -22,3 +22,10 @@ func TestDatabaseSimpleSelect(t *testing.T) {
 	}
 	assert.EqualValues(t, 42, num)
 }
+
+func TestDBCreateSchema(t *testing.T) {
+	s := new(Server)
+	s.setupDatabase()
+
+	s.DBCreateSchema()
+}
