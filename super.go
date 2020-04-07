@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
 )
 
 // SuperInterface interface for Super
@@ -104,14 +105,43 @@ func (s *Super) getByNameOrUUID(db *pg.DB, idStr string) (*Super, error) {
 	return &super, nil
 }
 
-// Read queries one Super from database
+// Read one Super from database
 func (s *Super) Read(db *pg.DB) *Super {
 	return s
 }
 
-// ReadAll read all Super from database
+// ReadAll read all Super from database (by ANDing super fields as filters)
 func (s *Super) ReadAll(db *pg.DB) []Super {
-	return []Super{}
+
+	filter := func(q *orm.Query) (*orm.Query, error) {
+		// Specs state filter only by Name and UUID
+		if s.Type != "" {
+			q = q.Where("upper(type) = ?", strings.ToUpper(superFilter.Type))
+		}
+		if s.Name != "" {
+			// must match case
+			q = q.Where("name = ?", superFilter.Name)
+		}
+		if s.UUID != "" {
+			// postgres uuid is already case insensitive
+			q = q.Where("upper(uuid::text) = ?", strings.ToUpper(superFilter.UUID))
+		}
+
+		// TODO: add other fields
+	}
+
+	// supersResult=[] instead of supersResult=nil
+	supersResult := make([]Super, 0)
+
+	err := db.Model(&supersResult).
+		Apply(filter).
+		Select()
+	if err != nil {
+		panic(err)
+	}
+
+	return supersResult
+
 }
 
 // Update a Super on database
