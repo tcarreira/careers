@@ -114,20 +114,23 @@ func (s *Super) Read(db *pg.DB) *Super {
 func (s *Super) ReadAll(db *pg.DB) []Super {
 
 	filter := func(q *orm.Query) (*orm.Query, error) {
+
 		// Specs state filter only by Name and UUID
 		if s.Type != "" {
-			q = q.Where("upper(type) = ?", strings.ToUpper(superFilter.Type))
+			q = q.Where("upper(type) = ?", strings.ToUpper(s.Type))
 		}
 		if s.Name != "" {
 			// must match case
-			q = q.Where("name = ?", superFilter.Name)
+			q = q.Where("name = ?", s.Name)
 		}
 		if s.UUID != "" {
 			// postgres uuid is already case insensitive
-			q = q.Where("upper(uuid::text) = ?", strings.ToUpper(superFilter.UUID))
+			q = q.Where("upper(uuid::text) = ?", strings.ToUpper(s.UUID))
 		}
 
 		// TODO: add other fields
+
+		return q, nil
 	}
 
 	// supersResult=[] instead of supersResult=nil
