@@ -6,15 +6,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func setRoutes(r *gin.Engine) *gin.Engine {
+func setRoutes(s *Server) *gin.Engine {
 
-	r.GET("/", func(c *gin.Context) {
+	s.Router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"data": "hello world"})
 	})
 
-	v1 := r.Group("/api/v1")
+	v1 := s.Router.Group("/api/v1")
 	{
-		api := new(SuperAPI)
+		api := SuperAPI{
+			DB:     s.DB,
+			Router: s.Router,
+		}
 
 		v1.POST("/supers", api.supersPOSTHandler)
 		v1.GET("/supers", api.supersGETHandler)
@@ -23,13 +26,13 @@ func setRoutes(r *gin.Engine) *gin.Engine {
 		v1.DELETE("/supers/:id", api.supersDeleteHandler)
 	}
 
-	return r
+	return s.Router
 }
 
 func (s *Server) setupRouter() *Server {
 	s.Router = gin.Default()
 
-	s.Router = setRoutes(s.Router)
+	s.Router = setRoutes(s)
 
 	return s
 }

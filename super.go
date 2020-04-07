@@ -1,14 +1,16 @@
 package main
 
-import "github.com/go-pg/pg"
+import (
+	"github.com/go-pg/pg"
+)
 
 // SuperInterface interface for Super
 type SuperInterface interface {
-	Create(db *pg.DB) *Super
-	Read(db *pg.DB) *Super
-	ReadAll(db *pg.DB) []Super
-	Update(db *pg.DB) *Super
-	Delete(db *pg.DB)
+	Create(db *pg.DB) (*Super, error)
+	Read(db *pg.DB) (*Super, error)
+	ReadAll(db *pg.DB) ([]Super, error)
+	Update(db *pg.DB) (*Super, error)
+	Delete(db *pg.DB) error
 }
 
 // Super represents either a SuperHero or a SuperVilan
@@ -24,9 +26,27 @@ type Super struct {
 	ImageURL     string `json:"image_url"`
 }
 
+type errorSuperAlreadyExists struct {
+	s string
+}
+
+func (e *errorSuperAlreadyExists) Error() string {
+	return e.s
+}
+
 // Create saves the Super to database
-func (s *Super) Create(db *pg.DB) *Super {
-	return s
+func (s *Super) Create(db *pg.DB) (*Super, error) {
+	if err := db.Insert(s); err != nil {
+		pgErr, ok := err.(pg.Error)
+		if ok {
+			if pgErr.IntegrityViolation() {
+				return s, &errorSuperAlreadyExists{err.Error()}
+			}
+		}
+		panic(err)
+	}
+
+	return s, nil
 }
 
 // Read queries one Super from database
