@@ -79,6 +79,18 @@ func TestSuper_Create_2(t *testing.T) {
 
 }
 
+func TestSuper_Create_badType(t *testing.T) {
+	var err error
+
+	super := Super{
+		Type: "Something",
+	}
+
+	_, err = super.Create(s.DB)
+
+	assert.Error(t, err)
+}
+
 func TestSuper_getByNameOrUUID_byUUID(t *testing.T) {
 	var got *Super
 	var err error
@@ -97,6 +109,14 @@ func TestSuper_getByNameOrUUID_byName(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "HERO", got.Type)
 	assert.Equal(t, "Test1", got.Name)
+}
+
+func TestSuper_getByNameOrUUID_notExists(t *testing.T) {
+	var got *Super
+	var err error
+
+	_, err = got.getByNameOrUUID(s.DB, "12356890")
+	assert.Error(t, err)
 }
 
 func TestSuper_ReadAll_1(t *testing.T) {

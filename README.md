@@ -64,9 +64,9 @@ DB_HOST=db DB_USER=user DB_PASS=pass go test -v ./... -tags sql
 - [X] Setup docker (it will be easier for Database integration)
 - [X] Add Postgres and go-pg
 - [X] Setup command-line admin (create db-schema)
-- [ ] Create new Super (Hero/Vilan)
+- [X] Create new Super (Hero/Vilan)
     - [X] Super structs
     - [X] POST
     - [X] GET
-- [ ] GET filters (by type, name, uuid)
+- [X] GET filters (by type, name, uuid)
 - [ ] DELETE Super

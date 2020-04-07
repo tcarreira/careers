@@ -61,7 +61,6 @@ func (s *Server) DBCreateSchema() *Server {
 // dbDropSchema should be used only by tests
 func (s *Server) dbDropSchema() *Server {
 	for _, model := range []interface{}{(*Super)(nil)} {
-		fmt.Printf("DROPing table for %T\n", model)
 		err := s.DB.DropTable(model, &orm.DropTableOptions{IfExists: true})
 		if err != nil {
 			fmt.Println(err)
