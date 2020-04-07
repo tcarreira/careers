@@ -5,7 +5,6 @@ package main
 import (
 	"testing"
 
-	"github.com/go-pg/pg"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -100,42 +99,131 @@ func TestSuper_getByNameOrUUID_byName(t *testing.T) {
 	assert.Equal(t, "Test1", got.Name)
 }
 
-func TestSuper_Delete(t *testing.T) {
-	type fields struct {
-		Type         string
-		ID           uint64
-		Name         string
-		UUID         string
-		FullName     string
-		Intelligence int64
-		Power        int64
-		Occupation   string
-		ImageURL     string
+func TestSuper_ReadAll_1(t *testing.T) {
+	var got []Super
+	var err error
+
+	// Setup Database for this tests
+	s.setupEmptyTestDatabase()
+
+	supers := []Super{
+		Super{
+			Type: "HERO",
+			Name: "h1",
+			UUID: "47c0df01-a47d-497f-808d-181021f01c76",
+		},
+		Super{
+			Type: "HERO",
+			Name: "h2",
+		},
+		Super{
+			Type: "HERO",
+			Name: "h3",
+		},
+		Super{
+			Type: "VILAN",
+			Name: "v1",
+		},
 	}
-	type args struct {
-		db *pg.DB
+
+	for i := range supers {
+		supers[i].Create(s.DB)
 	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &Super{
-				Type:         tt.fields.Type,
-				ID:           tt.fields.ID,
-				Name:         tt.fields.Name,
-				UUID:         tt.fields.UUID,
-				FullName:     tt.fields.FullName,
-				Intelligence: tt.fields.Intelligence,
-				Power:        tt.fields.Power,
-				Occupation:   tt.fields.Occupation,
-				ImageURL:     tt.fields.ImageURL,
-			}
-			s.Delete(tt.args.db)
-		})
-	}
+
+	// perform tests on previous data
+	t.Run("Test ReadAll - no filters", func(t *testing.T) {
+		super := Super{}
+		got = super.ReadAll(s.DB)
+
+		assert.NoError(t, err)
+		assert.EqualValues(t, 4, len(got))
+
+		expectedResuts := map[string]struct {
+			Type string
+			Name string
+		}{
+			"h1": {"HERO", "h1"},
+			"h2": {"HERO", "h2"},
+			"h3": {"HERO", "h3"},
+			"v1": {"VILAN", "v1"},
+		}
+
+		for _, super := range got {
+			assert.Equal(t, expectedResuts[super.Name].Type, super.Type)
+			assert.Equal(t, expectedResuts[super.Name].Name, super.Name)
+			delete(expectedResuts, super.Name)
+		}
+		assert.Equal(t, 0, len(expectedResuts))
+	})
+
+	t.Run("Test ReadAll - filter Type", func(t *testing.T) {
+		super := Super{Type: "HERO"}
+		got = super.ReadAll(s.DB)
+
+		assert.NoError(t, err)
+		assert.EqualValues(t, 3, len(got))
+
+		expectedResuts := map[string]struct {
+			Type string
+			Name string
+		}{
+			"h1": {"HERO", "h1"},
+			"h2": {"HERO", "h2"},
+			"h3": {"HERO", "h3"},
+		}
+
+		for _, super := range got {
+			assert.Equal(t, expectedResuts[super.Name].Type, super.Type)
+			assert.Equal(t, expectedResuts[super.Name].Name, super.Name)
+			delete(expectedResuts, super.Name)
+		}
+		assert.Equal(t, 0, len(expectedResuts))
+	})
+
+	t.Run("Test ReadAll - filter Name", func(t *testing.T) {
+		super := Super{Name: "v1"}
+		got = super.ReadAll(s.DB)
+
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, len(got))
+
+		expectedResuts := map[string]struct {
+			Type string
+			Name string
+		}{
+			"v1": {"VILAN", "v1"},
+		}
+
+		for _, super := range got {
+			assert.Equal(t, expectedResuts[super.Name].Type, super.Type)
+			assert.Equal(t, expectedResuts[super.Name].Name, super.Name)
+			delete(expectedResuts, super.Name)
+		}
+		assert.Equal(t, 0, len(expectedResuts))
+	})
+
+	t.Run("Test ReadAll - filter UUID", func(t *testing.T) {
+		super := Super{UUID: "47c0df01-a47d-497f-808d-181021f01c76"}
+		got = super.ReadAll(s.DB)
+
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, len(got))
+
+		expectedResuts := map[string]struct {
+			Type string
+			Name string
+			UUID string
+		}{
+			"h1": {"HERO", "h1", "47c0df01-a47d-497f-808d-181021f01c76"},
+		}
+
+		for _, super := range got {
+			assert.Equal(t, expectedResuts[super.Name].Type, super.Type)
+			assert.Equal(t, expectedResuts[super.Name].Name, super.Name)
+			assert.Equal(t, expectedResuts[super.Name].UUID, super.UUID)
+			delete(expectedResuts, super.Name)
+		}
+		assert.Equal(t, 0, len(expectedResuts))
+	})
+
 }

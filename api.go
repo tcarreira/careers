@@ -90,7 +90,7 @@ func (api *SuperAPI) supersGETHandler(c *gin.Context) {
 			})
 		} else {
 			results := sFilter.ReadAll(api.DB)
-			
+
 			c.JSON(http.StatusOK, results)
 		}
 	}
