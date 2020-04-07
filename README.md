@@ -47,13 +47,13 @@ DB_HOST=db DB_USER=user DB_PASS=pass go test -v ./... -tags sql
 
 # Features
 
-- [ ] Create new Super(Hero/Vilan)
-- [ ] Get Super list
-- [ ] Get Super(Heroes) list
-- [ ] Get Super(Vilans) list
-- [ ] Search by name
-- [ ] Search by uuid
-- [ ] Delete Super
+- [X] Create new Super(Hero/Vilan)
+- [X] Get Super list
+- [X] Get Super(Heroes) list
+- [X] Get Super(Vilans) list
+- [X] Search by name
+- [X] Search by uuid
+- [X] Delete Super
 - [ ] Super Groups
 
 
@@ -69,4 +69,7 @@ DB_HOST=db DB_USER=user DB_PASS=pass go test -v ./... -tags sql
     - [X] POST
     - [X] GET
 - [X] GET filters (by type, name, uuid)
-- [ ] DELETE Super
+- [X] DELETE Super
+- [ ] Implement Groups
+    - [ ] ...
+    - [ ] ...
