@@ -18,10 +18,10 @@ type SuperInterface interface {
 
 // Super represents either a SuperHero or a SuperVilan
 type Super struct {
-	Type         string `json:"type" form:"type"`
-	ID           uint64 `json:"id" sql:",pk"`
-	Name         string `json:"name" form:"name" sql:",unique,notnull"`
+	ID           uint64 `json:"-" sql:",pk"`
 	UUID         string `json:"uuid" form:"uuid" sql:",notnull,type:uuid,default:gen_random_uuid()"`
+	Type         string `json:"type" form:"type"`
+	Name         string `json:"name" form:"name" sql:",unique,notnull"`
 	FullName     string `json:"fullname"`
 	Intelligence int64  `json:"intelligence"`
 	Power        int64  `json:"power"`

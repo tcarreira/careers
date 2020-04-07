@@ -28,8 +28,8 @@ func TestSuper_Create_1(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "HERO", got.Type) // converts Hero -> HERO
 	assert.Equal(t, "Test1", got.Name)
-	assert.NotEqual(t, 0, got.ID) // got a new ID from database
-	assert.NotEmpty(t, got.UUID)  // got new UUID from database
+	assert.Less(t, uint64(0), got.ID) // got a new ID from database
+	assert.NotEmpty(t, got.UUID)      // got new UUID from database
 
 	// Try again the same
 	got, err = super.Create(s.DB)
@@ -69,7 +69,7 @@ func TestSuper_Create_2(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "VILAN", got.Type) // converts Hero -> HERO
 	assert.Equal(t, "super2", got.Name)
-	assert.Less(t, uint64(0), got.ID)                                 // got a new ID from database
+	assert.Less(t, uint64(0), got.ID)                                 // got a new id from database
 	assert.Equal(t, "47c0df01-a47d-497f-808d-181021f01c76", got.UUID) // got new UUID from database
 	assert.Equal(t, "su per 2", got.FullName)
 	assert.EqualValues(t, 1, got.Intelligence)
