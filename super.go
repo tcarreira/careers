@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/go-pg/pg"
 )
 
@@ -34,8 +36,36 @@ func (e *errorSuperAlreadyExists) Error() string {
 	return e.s
 }
 
+
+
+type errorSuperInvalidFields struct {
+	s string
+}
+
+func (e *errorSuperInvalidFields) Error() string {
+	return e.s
+}
+func (s *Super) validate() (*Super, error) {
+
+	// Check Type is one of HERO|VILAN (should be enum...)
+	switch strings.ToUpper(s.Type) {
+	case
+		"HERO",
+		"VILAN":
+		s.Type = strings.ToUpper(s.Type)
+	default:
+		return s, &errorSuperInvalidFields{"Type should be one of [\"HERO\", \"VILAN\"]"}
+	}
+
+	return s, nil
+}
+
 // Create saves the Super to database
 func (s *Super) Create(db *pg.DB) (*Super, error) {
+	if _, err := s.validate(); err != nil {
+		return s, err
+	}
+
 	if err := db.Insert(s); err != nil {
 		pgErr, ok := err.(pg.Error)
 		if ok {

@@ -66,7 +66,7 @@ DB_HOST=db DB_USER=user DB_PASS=pass go test -v ./... -tags sql
 - [X] Setup command-line admin (create db-schema)
 - [ ] Create new Super (Hero/Vilan)
     - [X] Super structs
-    - [ ] POST
+    - [X] POST
     - [ ] GET
 - [ ] GET filters (by type, name, uuid)
 - [ ] DELETE Super

@@ -1,0 +1,81 @@
+// +build sql
+
+package main
+
+import (
+	"testing"
+
+	"github.com/go-pg/pg"
+	"github.com/stretchr/testify/assert"
+)
+
+var s *Server
+
+func TestSuper_Create_1(t *testing.T) {
+	var got *Super
+	var err error
+
+	// Setup DB on first test
+	s = &Server{}
+	s.setupEmptyTestDatabase()
+
+	super := Super{
+		Type: "Hero",
+		Name: "Test1",
+	}
+
+	got, err = super.Create(s.DB)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "HERO", got.Type) // converts Hero -> HERO
+	assert.Equal(t, "Test1", got.Name)
+	assert.NotEqual(t, 0, got.ID) // got a new ID from database
+	assert.NotEmpty(t, got.UUID)  // got new UUID from database
+
+	// Try again the same
+	got, err = super.Create(s.DB)
+	assert.Error(t, err)
+}
+
+func TestSuper_Create_1repeated(t *testing.T) {
+	var err error
+
+	super := Super{
+		Type: "Hero",
+		Name: "Test1",
+	}
+
+	// Try again the same
+	_, err = super.Create(s.DB)
+	assert.Error(t, err)
+}
+
+func TestSuper_Create_2(t *testing.T) {
+	var got *Super
+	var err error
+
+	super := Super{
+		Type:         "Vilan",
+		Name:         "super2",
+		UUID:         "47c0df01-a47d-497f-808d-181021f01c76",
+		FullName:     "su per 2",
+		Intelligence: 1,
+		Power:        99,
+		Occupation:   "something",
+		ImageURL:     "url",
+	}
+
+	got, err = super.Create(s.DB)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "VILAN", got.Type) // converts Hero -> HERO
+	assert.Equal(t, "super2", got.Name)
+	assert.Less(t, uint64(0), got.ID)                                 // got a new ID from database
+	assert.Equal(t, "47c0df01-a47d-497f-808d-181021f01c76", got.UUID) // got new UUID from database
+	assert.Equal(t, "su per 2", got.FullName)
+	assert.EqualValues(t, 1, got.Intelligence)
+	assert.EqualValues(t, 99, got.Power)
+	assert.Equal(t, "something", got.Occupation)
+	assert.Equal(t, "url", got.ImageURL)
+
+}
