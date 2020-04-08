@@ -46,7 +46,7 @@ func (s *Server) DBCreateSchema() *Server {
 		panic(err)
 	}
 
-	for _, model := range []interface{}{(*Super)(nil)} {
+	for _, model := range []interface{}{(*Super)(nil), (*Group)(nil)} {
 		fmt.Printf("Creating table for %T\n", model)
 		err := s.DB.CreateTable(model, &orm.CreateTableOptions{IfNotExists: true})
 		if err != nil {
@@ -60,7 +60,7 @@ func (s *Server) DBCreateSchema() *Server {
 
 // dbDropSchema should be used only by tests
 func (s *Server) dbDropSchema() *Server {
-	for _, model := range []interface{}{(*Super)(nil)} {
+	for _, model := range []interface{}{(*Super)(nil), (*Group)(nil)} {
 		err := s.DB.DropTable(model, &orm.DropTableOptions{IfExists: true})
 		if err != nil {
 			fmt.Println(err)
