@@ -71,5 +71,7 @@ DB_HOST=db DB_USER=user DB_PASS=pass go test -v ./... -tags sql
 - [X] GET filters (by type, name, uuid)
 - [X] DELETE Super
 - [ ] Implement Groups
-    - [ ] ...
-    - [ ] ...
+    - [ ] Group struct
+    - [ ] POST New Group
+    - [ ] GET Group
+    - [ ] PUT Group
