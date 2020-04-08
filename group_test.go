@@ -82,9 +82,6 @@ func TestGroup_Create(t *testing.T) {
 
 func TestGroup_GetByName(t *testing.T) {
 
-	var got *Group
-	var err error
-
 	s := Server{}
 	s.setupEmptyTestDatabase()
 
@@ -115,7 +112,7 @@ func TestGroup_GetByName(t *testing.T) {
 	}
 
 	t.Run("TestGroup_GetByName - test1 - with multiple Super", func(t *testing.T) {
-		got, err = new(Group).GetByName(s.DB, "group1")
+		got, err := new(Group).GetByName(s.DB, "group1")
 
 		assert.NoError(t, err)
 		assert.Equal(t, "group1", got.Name)
@@ -123,15 +120,15 @@ func TestGroup_GetByName(t *testing.T) {
 	})
 
 	t.Run("TestGroup_GetByName - test2 - with one Super", func(t *testing.T) {
-		got, err = new(Group).GetByName(s.DB, "group2")
+		got, err := new(Group).GetByName(s.DB, "group2")
 
 		assert.NoError(t, err)
 		assert.Equal(t, "group2", got.Name)
-		assertSupers(t, []Super{Super{Name: "t1"}}, got.Supers)
+		assertSupers(t, []Super{Super{Type: "HERO", Name: "t1"}}, got.Supers)
 	})
 
 	t.Run("TestGroup_GetByName - test3 - with zero Super", func(t *testing.T) {
-		got, err = new(Group).GetByName(s.DB, "group3")
+		got, err := new(Group).GetByName(s.DB, "group3")
 
 		assert.NoError(t, err)
 		assert.Equal(t, "group3", got.Name)
@@ -139,15 +136,12 @@ func TestGroup_GetByName(t *testing.T) {
 	})
 
 	t.Run("TestGroup_GetByName - not found", func(t *testing.T) {
-		got, err = new(Group).GetByName(s.DB, "groupX")
+		_, err := new(Group).GetByName(s.DB, "groupX")
 		assert.Error(t, err)
 	})
 }
 
 func TestGroup_GetAllBySuper(t *testing.T) {
-	var got []Group
-	var err error
-
 	s := Server{}
 	s.setupEmptyTestDatabase()
 
@@ -163,11 +157,15 @@ func TestGroup_GetAllBySuper(t *testing.T) {
 	groups := []Group{
 		Group{
 			Name:   "group1",
-			Supers: supers[0:1],
+			Supers: supers[0:2],
 		},
 		Group{
 			Name:   "group2",
 			Supers: []Super{supers[0]},
+		},
+		Group{
+			Name:   "group3",
+			Supers: []Super{},
 		},
 	}
 	for i := range groups {
@@ -175,16 +173,16 @@ func TestGroup_GetAllBySuper(t *testing.T) {
 	}
 
 	t.Run("TestGroup_GetAllBySuper - multiple groups", func(t *testing.T) {
-		got, err = new(Group).GetAllBySuper(s.DB, supers[0])
+		got, err := new(Group).GetAllBySuper(s.DB, supers[0])
 
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(got))
-		assertGroups(t, groups, got)
+		assertGroups(t, groups[0:2], got)
 
 	})
 
 	t.Run("TestGroup_GetAllBySuper - one group", func(t *testing.T) {
-		got, err = new(Group).GetAllBySuper(s.DB, supers[1])
+		got, err := new(Group).GetAllBySuper(s.DB, supers[1])
 
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(got))
@@ -192,7 +190,7 @@ func TestGroup_GetAllBySuper(t *testing.T) {
 	})
 
 	t.Run("TestGroup_GetAllBySuper - zero groups", func(t *testing.T) {
-		got, err = new(Group).GetAllBySuper(s.DB, supers[2])
+		got, err := new(Group).GetAllBySuper(s.DB, supers[2])
 
 		assert.NoError(t, err)
 		assert.Equal(t, 0, len(got))

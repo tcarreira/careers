@@ -8,17 +8,19 @@ import (
 
 // Group represents a group of supers
 type Group struct {
-	ID     uint64  `json:"-" sql:",pk"`
-	Name   string  `json:"name" sql:",unique,notnull"`
-	Supers []Super `json:"supers" pg:"many2many:group_supers,joinFK:super_id"`
+	tableName struct{} `pg:"alias:g"`
+	ID        uint64   `json:"-" sql:",pk"`
+	Name      string   `json:"name" sql:",unique,notnull"`
+	Supers    []Super  `json:"supers" pg:"many2many:group_supers,joinFK:super_id"`
 }
 
 // GroupSuper represents many2many table Groups-Supers
 type GroupSuper struct {
-	GroupID uint64 `sql:"group_id,pk"`
-	Group   *Group
-	SuperID uint64 `sql:"super_id,pk"`
-	Super   *Super
+	tableName struct{} `pg:"alias:g2s"`
+	GroupID   uint64   `sql:"group_id,pk"`
+	Group     *Group
+	SuperID   uint64 `sql:"super_id,pk"`
+	Super     *Super
 }
 
 type errorGroupAlreadyExists struct {
@@ -97,5 +99,21 @@ func (g *Group) GetByName(db *pg.DB, name string) (*Group, error) {
 
 // GetAllBySuper gets a list of Groups which Super is part of
 func (g *Group) GetAllBySuper(db *pg.DB, super Super) ([]Group, error) {
-	return []Group{}, nil
+	var results []Group
+
+	err := db.Model(&results).
+		Join("JOIN group_supers AS gs").
+		JoinOn("gs.group_id = \"group\".id").
+		JoinOn("gs.super_id = ?", super.ID).
+		Relation("Supers").
+		Select()
+
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return results, &errorGroupNotFound{err.Error()}
+		}
+		return results, err
+	}
+
+	return results, nil
 }
