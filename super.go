@@ -19,26 +19,30 @@ type SuperInterface interface {
 
 // Super represents either a SuperHero or a SuperVilan
 type Super struct {
-	ID           uint64  `json:"-" sql:",pk"`
-	UUID         string  `json:"uuid" form:"uuid" sql:",notnull,type:uuid,default:gen_random_uuid()"`
-	Type         string  `json:"type" form:"type"`
-	Name         string  `json:"name" form:"name" sql:",unique,notnull"`
-	FullName     string  `json:"fullname"`
-	Intelligence int64   `json:"intelligence"`
-	Power        int64   `json:"power"`
-	Occupation   string  `json:"occupation"`
-	ImageURL     string  `json:"image_url"`
-	Groups       []Group `json:"-" pg:"many2many:group_supers,joinFK:group_id"`
+	ID             uint64  `json:"-" sql:",pk"`
+	UUID           string  `json:"uuid" form:"uuid" sql:",notnull,type:uuid,default:gen_random_uuid()"`
+	Type           string  `json:"type" form:"type"`
+	Name           string  `json:"name" form:"name" sql:",unique,notnull"`
+	FullName       string  `json:"fullname"`
+	Intelligence   int64   `json:"intelligence,string"`
+	Power          int64   `json:"power,string"`
+	Occupation     string  `json:"occupation"`
+	ImageURL       string  `json:"image_url"`
+	Groups         []Group `json:"-" pg:"many2many:group_supers,joinFK:group_id"`
+	RelativesCount int     `json:"relatives_count,string" sql:"-"`
 }
 
 // MarshalJSON will render a Super JSON with a []string of group names instead of []Group
 func (s *Super) MarshalJSON() ([]byte, error) {
 	type Alias Super
 
+	// Adding a list of Group names
 	groupsNames := make([]string, 0)
 	for _, group := range s.Groups {
 		groupsNames = append(groupsNames, group.Name)
 	}
+
+	// Count of unique Groups
 
 	return json.Marshal(&struct {
 		*Alias
@@ -110,10 +114,15 @@ func (s *Super) Create(db *pg.DB) (*Super, error) {
 func (s *Super) getByNameOrUUID(db *pg.DB, idStr string) (*Super, error) {
 	super := Super{}
 
-	err := db.Model(&super).
+	err := db.Model(&super).TableExpr("supers AS s").
 		Relation("Groups").
-		Where("name = ?", idStr).
-		WhereOr("upper(uuid::text) = ?", strings.ToUpper(idStr)).
+		Column("s.*").ColumnExpr("count(distinct relatives.id) AS relatives_count").
+		Join("LEFT JOIN group_supers AS s2g ON s.id = s2g.super_id").
+		Join("LEFT JOIN group_supers AS g2s ON s2g.group_id = g2s.group_id").
+		Join("LEFT JOIN supers AS relatives ON g2s.super_id = relatives.id AND g2s.super_id != s.id").
+		Where("s.name = ?", idStr).
+		WhereOr("upper(s.uuid::text) = ?", strings.ToUpper(idStr)).
+		Group("s.id").
 		Select(&super)
 
 	if err != nil {

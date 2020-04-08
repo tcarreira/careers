@@ -1,5 +1,3 @@
-// +build sql
-
 package main
 
 import (
@@ -288,6 +286,52 @@ func TestSuper_ReadAll(t *testing.T) {
 			delete(expectedResuts, super.Name)
 		}
 		assert.Equal(t, 0, len(expectedResuts))
+	})
+
+}
+
+func TestSuper_GroupsRelatives(t *testing.T) {
+	s := Server{}
+	s.setupEmptyTestDatabase()
+
+	supers := []Super{
+		Super{Type: "HERO", Name: "main", UUID: "41f0bc0e-89f7-4ea7-a4f5-9d08e5383b9c"},
+		Super{Type: "HERO", Name: "rel1"},
+		Super{Type: "HERO", Name: "rel2"},
+		Super{Type: "HERO", Name: "rel3"},
+	}
+	for i := range supers {
+		supers[i].Create(s.DB)
+	}
+	groups := []Group{
+		Group{Name: "g1", Supers: supers[0:3]},
+		Group{Name: "g2", Supers: supers[1:4]},
+		Group{Name: "g3", Supers: supers[0:4]},
+	}
+	for i := range groups {
+		groups[i].Create(s.DB)
+	}
+
+	t.Run("TestSuper_GroupsRelatives - Marshal Super JSON", func(t *testing.T) {
+		// This test is very prone to errors
+		// special attention to "relatives_count": and "groups":
+		super, _ := new(Super).getByNameOrUUID(s.DB, supers[0].Name)
+
+		superJSON, err := super.MarshalJSON()
+
+		assert.NoError(t, err)
+		assert.Equal(t,
+			string(`{"uuid":"41f0bc0e-89f7-4ea7-a4f5-9d08e5383b9c","type":"HERO","name":"main","fullname":"","intelligence":"0","power":"0","occupation":"","image_url":"","relatives_count":"3","groups":["g1","g3"]}`),
+			string(superJSON),
+		)
+
+	})
+	t.Run("TestSuper_GroupsRelatives - RelativesCount", func(t *testing.T) {
+		super, err := new(Super).getByNameOrUUID(s.DB, supers[0].Name)
+
+		assert.NoError(t, err)
+		assert.Equal(t, int(3), super.RelativesCount)
+
 	})
 
 }
