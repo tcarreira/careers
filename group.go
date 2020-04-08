@@ -109,9 +109,6 @@ func (g *Group) GetAllBySuper(db *pg.DB, super Super) ([]Group, error) {
 		Select()
 
 	if err != nil {
-		if err == pg.ErrNoRows {
-			return results, &errorGroupNotFound{err.Error()}
-		}
 		return results, err
 	}
 
