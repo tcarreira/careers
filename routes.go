@@ -24,6 +24,11 @@ func setRoutes(s *Server) *gin.Engine {
 		v1.GET("/supers/:id", api.supersGETHandler)
 		v1.PUT("/supers/:id", api.supersPUTHandler)
 		v1.DELETE("/supers/:id", api.supersDeleteHandler)
+
+		v1.POST("/groups", api.groupsPOSTHandler)
+		v1.GET("/groups/:name", api.groupsGETHandler)
+		v1.PUT("/groups/:name", api.groupsPUTHandler)
+		v1.DELETE("/groups/:name", api.groupsDeleteHandler)
 	}
 
 	return s.Router

@@ -125,3 +125,27 @@ func (api *SuperAPI) supersDeleteHandler(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 	}
 }
+
+func (api *SuperAPI) groupsPOSTHandler(c *gin.Context) {
+	c.JSON(http.StatusNotImplemented, errorResponseJSON{
+		"Not implemented (yet)", "",
+	})
+}
+
+func (api *SuperAPI) groupsGETHandler(c *gin.Context) {
+	c.JSON(http.StatusNotImplemented, errorResponseJSON{
+		"Not implemented (yet)", "",
+	})
+}
+
+func (api *SuperAPI) groupsPUTHandler(c *gin.Context) {
+	c.JSON(http.StatusNotImplemented, errorResponseJSON{
+		"Not implemented", "out of the scope for this exercise",
+	})
+}
+
+func (api *SuperAPI) groupsDeleteHandler(c *gin.Context) {
+	c.JSON(http.StatusNotImplemented, errorResponseJSON{
+		"Not implemented", "out of the scope for this exercise",
+	})
+}
