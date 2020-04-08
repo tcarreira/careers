@@ -8,52 +8,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var s *Server
-
-func TestSuper_Create_1(t *testing.T) {
+func TestSuper_Create(t *testing.T) {
 	var got *Super
 	var err error
 
-	// Setup DB on first test
-	s = &Server{}
+	s := Server{}
 	s.setupEmptyTestDatabase()
 
-	super := Super{
+	super1 := Super{
 		Type: "Hero",
 		Name: "Test1",
 	}
-
-	got, err = super.Create(s.DB)
-
-	assert.NoError(t, err)
-	assert.Equal(t, "HERO", got.Type) // converts Hero -> HERO
-	assert.Equal(t, "Test1", got.Name)
-	assert.Less(t, uint64(0), got.ID) // got a new ID from database
-	assert.NotEmpty(t, got.UUID)      // got new UUID from database
-
-	// Try again the same
-	got, err = super.Create(s.DB)
-	assert.Error(t, err)
-}
-
-func TestSuper_Create_1repeated(t *testing.T) {
-	var err error
-
-	super := Super{
-		Type: "Hero",
-		Name: "Test1",
-	}
-
-	// Try again the same
-	_, err = super.Create(s.DB)
-	assert.Error(t, err)
-}
-
-func TestSuper_Create_2(t *testing.T) {
-	var got *Super
-	var err error
-
-	super := Super{
+	super2 := Super{
 		Type:         "Vilan",
 		Name:         "super2",
 		UUID:         "47c0df01-a47d-497f-808d-181021f01c76",
@@ -64,92 +30,144 @@ func TestSuper_Create_2(t *testing.T) {
 		ImageURL:     "url",
 	}
 
-	got, err = super.Create(s.DB)
+	t.Run("TestSuper_Create - Create with Type and Name", func(t *testing.T) {
 
-	assert.NoError(t, err)
-	assert.Equal(t, "VILAN", got.Type) // converts Hero -> HERO
-	assert.Equal(t, "super2", got.Name)
-	assert.Less(t, uint64(0), got.ID)                                 // got a new id from database
-	assert.Equal(t, "47c0df01-a47d-497f-808d-181021f01c76", got.UUID) // got new UUID from database
-	assert.Equal(t, "su per 2", got.FullName)
-	assert.EqualValues(t, 1, got.Intelligence)
-	assert.EqualValues(t, 99, got.Power)
-	assert.Equal(t, "something", got.Occupation)
-	assert.Equal(t, "url", got.ImageURL)
+		got, err = super1.Create(s.DB)
 
-}
+		assert.NoError(t, err)
+		assert.Equal(t, "HERO", got.Type) // converts Hero -> HERO
+		assert.Equal(t, "Test1", got.Name)
+		assert.Less(t, uint64(0), got.ID) // got a new ID from database
+		assert.NotEmpty(t, got.UUID)      // got new UUID from database
+	})
 
-func TestSuper_Create_badType(t *testing.T) {
-	var err error
+	t.Run("TestSuper_Create - Repeat create - should fail", func(t *testing.T) {
+		// Try again the same
+		_, err = super1.Create(s.DB)
+		assert.Error(t, err)
+	})
 
-	super := Super{
-		Type: "Something",
-	}
+	t.Run("TestSuper_Create - Create with all fields", func(t *testing.T) {
 
-	_, err = super.Create(s.DB)
+		got, err = super2.Create(s.DB)
 
-	assert.Error(t, err)
+		assert.NoError(t, err)
+		assert.Equal(t, "VILAN", got.Type) // converts Hero -> HERO
+		assert.Equal(t, "super2", got.Name)
+		assert.Less(t, uint64(0), got.ID)                                 // got a new id from database
+		assert.Equal(t, "47c0df01-a47d-497f-808d-181021f01c76", got.UUID) // got new UUID from database
+		assert.Equal(t, "su per 2", got.FullName)
+		assert.EqualValues(t, 1, got.Intelligence)
+		assert.EqualValues(t, 99, got.Power)
+		assert.Equal(t, "something", got.Occupation)
+		assert.Equal(t, "url", got.ImageURL)
+	})
+
+	t.Run("TestSuper_Create - try a bad Super.Type", func(t *testing.T) {
+
+		badSuper := Super{
+			Type: "Something",
+		}
+
+		_, err = badSuper.Create(s.DB)
+
+		assert.Error(t, err)
+	})
 }
 
 func TestSuper_getByNameOrUUID_byUUID(t *testing.T) {
 	var got *Super
 	var err error
 
-	got, err = got.getByNameOrUUID(s.DB, "47c0df01-a47d-497f-808d-181021f01c76")
-	assert.NoError(t, err)
-	assert.Equal(t, "VILAN", got.Type)
-	assert.Equal(t, "super2", got.Name)
+	s := Server{}
+	s.setupEmptyTestDatabase()
+
+	supers := []Super{
+		Super{
+			Type: "Hero",
+			Name: "Test1",
+		},
+		Super{
+			Type: "Vilan",
+			Name: "super2",
+			UUID: "40000001-a47d-497f-808d-181021f01c76",
+		},
+	}
+
+	for i := range supers {
+		supers[i].Create(s.DB)
+	}
+
+	t.Run("TestSuper_getByNameOrUUID - by UUID", func(t *testing.T) {
+		got, err = got.getByNameOrUUID(s.DB, "40000001-a47d-497f-808d-181021f01c76")
+		assert.NoError(t, err)
+		assert.Equal(t, "VILAN", got.Type)
+		assert.Equal(t, "super2", got.Name)
+	})
+
+	t.Run("TestSuper_getByNameOrUUID - by Name", func(t *testing.T) {
+		got, err = got.getByNameOrUUID(s.DB, "Test1")
+		assert.NoError(t, err)
+		assert.Equal(t, "HERO", got.Type)
+		assert.Equal(t, "Test1", got.Name)
+	})
+
+	t.Run("TestSuper_getByNameOrUUID - does not exist", func(t *testing.T) {
+		_, err = got.getByNameOrUUID(s.DB, "12356890")
+		assert.Error(t, err)
+	})
 }
 
-func TestSuper_getByNameOrUUID_byName(t *testing.T) {
-	var got *Super
+func TestSuper_DeleteByNameOrUUID(t *testing.T) {
 	var err error
 
-	got, err = got.getByNameOrUUID(s.DB, "Test1")
-	assert.NoError(t, err)
-	assert.Equal(t, "HERO", got.Type)
-	assert.Equal(t, "Test1", got.Name)
+	s := Server{}
+	s.setupEmptyTestDatabase()
+
+	supers := []Super{
+		Super{
+			Type: "Hero",
+			Name: "Test1",
+		},
+		Super{
+			Type: "Vilan",
+			Name: "super2",
+			UUID: "40000002-a47d-497f-808d-181021f01c76",
+		},
+	}
+
+	for i := range supers {
+		supers[i].Create(s.DB)
+	}
+
+	t.Run("TestSuper_DeleteByNameOrUUID - by Name", func(t *testing.T) {
+		err = new(Super).DeleteByNameOrUUID(s.DB, "Test1")
+		assert.NoError(t, err)
+	})
+
+	t.Run("TestSuper_DeleteByNameOrUUID - by Name - same again", func(t *testing.T) {
+		err = new(Super).DeleteByNameOrUUID(s.DB, "Test1")
+		assert.Error(t, err)
+		assert.IsType(t, &errorSuperNotFound{""}, err)
+	})
+
+	t.Run("TestSuper_DeleteByNameOrUUID - by UUID", func(t *testing.T) {
+		err = new(Super).DeleteByNameOrUUID(s.DB, "40000002-a47d-497f-808d-181021f01c76")
+		assert.NoError(t, err)
+	})
+	t.Run("TestSuper_DeleteByNameOrUUID - by UUID - same again", func(t *testing.T) {
+		// Try again the same
+		err = new(Super).DeleteByNameOrUUID(s.DB, "40000002-a47d-497f-808d-181021f01c76")
+		assert.Error(t, err)
+		assert.IsType(t, &errorSuperNotFound{""}, err)
+	})
 }
 
-func TestSuper_getByNameOrUUID_notExists(t *testing.T) {
-	var got *Super
-	var err error
-
-	_, err = got.getByNameOrUUID(s.DB, "12356890")
-	assert.Error(t, err)
-}
-
-func TestSuper_DeleteByNameOrUUID_byName(t *testing.T) {
-	var super *Super
-	var err error
-
-	err = super.DeleteByNameOrUUID(s.DB, "Test1")
-	assert.NoError(t, err)
-
-	// Try again the same
-	err = super.DeleteByNameOrUUID(s.DB, "Test1")
-	assert.Error(t, err)
-	assert.IsType(t, &errorSuperNotFound{""}, err)
-}
-
-func TestSuper_DeleteByNameOrUUID_byUUID(t *testing.T) {
-	var super *Super
-	var err error
-
-	err = super.DeleteByNameOrUUID(s.DB, "47c0df01-a47d-497f-808d-181021f01c76")
-	assert.NoError(t, err)
-
-	// Try again the same
-	err = super.DeleteByNameOrUUID(s.DB, "47c0df01-a47d-497f-808d-181021f01c76")
-	assert.Error(t, err)
-	assert.IsType(t, &errorSuperNotFound{""}, err)
-}
-
-func TestSuper_ReadAll_1(t *testing.T) {
+func TestSuper_ReadAll(t *testing.T) {
 	var got []Super
 	var err error
 
-	// Setup Database for this tests
+	s := Server{}
 	s.setupEmptyTestDatabase()
 
 	supers := []Super{
