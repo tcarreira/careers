@@ -75,6 +75,6 @@ DB_HOST=db DB_USER=user DB_PASS=pass go test -v ./... -tags sql
     - [X] POST New Group
     - [X] GET Group
 - [ ] Specifics
-    - [ ] GET super retrieves List of Groups
+    - [X] GET super retrieves List of Groups
     - [ ] GET super retrieves number of relatives
     - [ ] Create a Super(Hero/Vilan) by name only

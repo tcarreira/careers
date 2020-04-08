@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/go-pg/pg"
@@ -11,7 +12,47 @@ type Group struct {
 	tableName struct{} `pg:"alias:g"`
 	ID        uint64   `json:"-" sql:",pk"`
 	Name      string   `json:"name" sql:",unique,notnull"`
-	Supers    []Super  `json:"supers" pg:"many2many:group_supers,joinFK:super_id"`
+	Supers    []Super  `json:"-" pg:"many2many:group_supers,joinFK:super_id"`
+}
+
+// MarshalJSON will render a Super JSON with a []string of group names instead of []Group
+func (g *Group) MarshalJSON() ([]byte, error) {
+	type Alias Group
+
+	supersNames := make([]string, 0)
+	for _, super := range g.Supers {
+		supersNames = append(supersNames, super.Name)
+	}
+
+	return json.Marshal(&struct {
+		*Alias
+		Supers []string `json:"supers"`
+	}{
+		Alias:  (*Alias)(g),
+		Supers: supersNames,
+	})
+}
+
+// UnmarshalJSON will instantiate a Group from a JSON, where Supers is a []string of Super names
+func (g *Group) UnmarshalJSON(data []byte) error {
+	type Alias Group
+	aux := &struct {
+		*Alias
+		Supers []string `json:"supers"`
+	}{
+		Alias: (*Alias)(g),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	supers := make([]Super, 0)
+	for _, name := range aux.Supers {
+		supers = append(supers, Super{Name: name})
+	}
+	g.Supers = supers
+
+	return nil
 }
 
 // GroupSuper represents many2many table Groups-Supers
@@ -61,13 +102,24 @@ func (g *Group) Create(db *pg.DB) (*Group, error) {
 
 	var minorErrors []string
 	for _, super := range g.Supers {
-		if err := db.Insert(&GroupSuper{
-			GroupID: g.ID,
-			Group:   g,
-			SuperID: super.ID,
-			Super:   &super,
-		}); err != nil {
-			minorErrors = append(minorErrors, err.Error())
+		var s *Super
+		var err error
+
+		// Get Super from DB
+		s, err = super.getByNameOrUUID(db, super.Name)
+		if err != nil {
+			minorErrors = append(minorErrors,
+				"(super:'"+super.Name+"') "+err.Error(),
+			)
+		} else {
+			if err = db.Insert(&GroupSuper{
+				GroupID: g.ID,
+				Group:   g,
+				SuperID: s.ID,
+				Super:   s,
+			}); err != nil {
+				minorErrors = append(minorErrors, err.Error())
+			}
 		}
 	}
 

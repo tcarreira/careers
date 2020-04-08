@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/go-pg/pg"
@@ -18,15 +19,34 @@ type SuperInterface interface {
 
 // Super represents either a SuperHero or a SuperVilan
 type Super struct {
-	ID           uint64 `json:"-" sql:",pk"`
-	UUID         string `json:"uuid" form:"uuid" sql:",notnull,type:uuid,default:gen_random_uuid()"`
-	Type         string `json:"type" form:"type"`
-	Name         string `json:"name" form:"name" sql:",unique,notnull"`
-	FullName     string `json:"fullname"`
-	Intelligence int64  `json:"intelligence"`
-	Power        int64  `json:"power"`
-	Occupation   string `json:"occupation"`
-	ImageURL     string `json:"image_url"`
+	ID           uint64  `json:"-" sql:",pk"`
+	UUID         string  `json:"uuid" form:"uuid" sql:",notnull,type:uuid,default:gen_random_uuid()"`
+	Type         string  `json:"type" form:"type"`
+	Name         string  `json:"name" form:"name" sql:",unique,notnull"`
+	FullName     string  `json:"fullname"`
+	Intelligence int64   `json:"intelligence"`
+	Power        int64   `json:"power"`
+	Occupation   string  `json:"occupation"`
+	ImageURL     string  `json:"image_url"`
+	Groups       []Group `json:"-" pg:"many2many:group_supers,joinFK:group_id"`
+}
+
+// MarshalJSON will render a Super JSON with a []string of group names instead of []Group
+func (s *Super) MarshalJSON() ([]byte, error) {
+	type Alias Super
+
+	groupsNames := make([]string, 0)
+	for _, group := range s.Groups {
+		groupsNames = append(groupsNames, group.Name)
+	}
+
+	return json.Marshal(&struct {
+		*Alias
+		Groups []string `json:"groups"`
+	}{
+		Alias:  (*Alias)(s),
+		Groups: groupsNames,
+	})
 }
 
 type errorSuperAlreadyExists struct {
@@ -90,7 +110,8 @@ func (s *Super) Create(db *pg.DB) (*Super, error) {
 func (s *Super) getByNameOrUUID(db *pg.DB, idStr string) (*Super, error) {
 	super := Super{}
 
-	err := db.Model(&Super{}).
+	err := db.Model(&super).
+		Relation("Groups").
 		Where("name = ?", idStr).
 		WhereOr("upper(uuid::text) = ?", strings.ToUpper(idStr)).
 		Select(&super)
