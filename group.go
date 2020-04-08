@@ -9,9 +9,27 @@ type Group struct {
 	Supers []Super `json:"supers" pg:"many2many:group_supers"`
 }
 
+type errorGroupAlreadyExists struct {
+	s string
+}
+
+func (e *errorGroupAlreadyExists) Error() string {
+	return e.s
+}
+
 // Create a group with a list of Supers
 func (g *Group) Create(db *pg.DB) (*Group, error) {
-	return &Group{}, nil
+	if err := db.Insert(g); err != nil {
+		pgErr, ok := err.(pg.Error)
+		if ok {
+			if pgErr.IntegrityViolation() {
+				return g, &errorGroupAlreadyExists{err.Error()}
+			}
+		}
+		panic(err)
+	}
+
+	return g, nil
 }
 
 // GetByName gets a group by its name
