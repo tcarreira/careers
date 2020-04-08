@@ -1,5 +1,3 @@
-// +build tcwip
-
 package main
 
 import (
@@ -54,7 +52,10 @@ func TestGroup_Create(t *testing.T) {
 	s := Server{}
 	s.setupEmptyTestDatabase()
 
-	supers := []Super{Super{Name: "t1"}}
+	supers := []Super{
+		Super{Type: "HERO", Name: "t1"},
+		Super{Type: "HERO", Name: "t2"},
+	}
 	for i := range supers {
 		supers[i].Create(s.DB)
 	}
@@ -87,7 +88,10 @@ func TestGroup_GetByName(t *testing.T) {
 	s := Server{}
 	s.setupEmptyTestDatabase()
 
-	supers := []Super{Super{Name: "t1"}, Super{Name: "t2"}}
+	supers := []Super{
+		Super{Type: "HERO", Name: "t1"},
+		Super{Type: "HERO", Name: "t2"},
+	}
 	for i := range supers {
 		supers[i].Create(s.DB)
 	}
@@ -148,9 +152,9 @@ func TestGroup_GetAllBySuper(t *testing.T) {
 	s.setupEmptyTestDatabase()
 
 	supers := []Super{
-		Super{Name: "s1"},
-		Super{Name: "s2"},
-		Super{Name: "s3"},
+		Super{Type: "HERO", Name: "s1"},
+		Super{Type: "HERO", Name: "s2"},
+		Super{Type: "HERO", Name: "s3"},
 	}
 	for i := range supers {
 		supers[i].Create(s.DB)

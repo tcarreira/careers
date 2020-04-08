@@ -1,12 +1,24 @@
 package main
 
-import "github.com/go-pg/pg"
+import (
+	"strings"
+
+	"github.com/go-pg/pg"
+)
 
 // Group represents a group of supers
 type Group struct {
 	ID     uint64  `json:"-" sql:",pk"`
 	Name   string  `json:"name" sql:",unique,notnull"`
-	Supers []Super `json:"supers" pg:"many2many:group_supers"`
+	Supers []Super `json:"supers" pg:"many2many:group_supers,joinFK:super_id"`
+}
+
+// GroupSuper represents many2many table Groups-Supers
+type GroupSuper struct {
+	GroupID uint64 `sql:"group_id,pk"`
+	Group   *Group
+	SuperID uint64 `sql:"super_id,pk"`
+	Super   *Super
 }
 
 type errorGroupAlreadyExists struct {
@@ -14,6 +26,22 @@ type errorGroupAlreadyExists struct {
 }
 
 func (e *errorGroupAlreadyExists) Error() string {
+	return e.s
+}
+
+type errorGroupSuperRelation struct {
+	s string
+}
+
+func (e *errorGroupSuperRelation) Error() string {
+	return e.s
+}
+
+type errorGroupNotFound struct {
+	s string
+}
+
+func (e *errorGroupNotFound) Error() string {
 	return e.s
 }
 
@@ -29,12 +57,42 @@ func (g *Group) Create(db *pg.DB) (*Group, error) {
 		panic(err)
 	}
 
+	var minorErrors []string
+	for _, super := range g.Supers {
+		if err := db.Insert(&GroupSuper{
+			GroupID: g.ID,
+			Group:   g,
+			SuperID: super.ID,
+			Super:   &super,
+		}); err != nil {
+			minorErrors = append(minorErrors, err.Error())
+		}
+	}
+
+	if len(minorErrors) > 0 {
+		return g, &errorGroupSuperRelation{strings.Join(minorErrors, " | ")}
+	}
+
 	return g, nil
 }
 
 // GetByName gets a group by its name
 func (g *Group) GetByName(db *pg.DB, name string) (*Group, error) {
-	return &Group{}, nil
+	group := Group{}
+
+	err := db.Model(&group).
+		Relation("Supers").
+		Where("name = ?", name).
+		Select(&group)
+
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return &group, &errorGroupNotFound{err.Error()}
+		}
+		return &group, err
+	}
+
+	return &group, nil
 }
 
 // GetAllBySuper gets a list of Groups which Super is part of
