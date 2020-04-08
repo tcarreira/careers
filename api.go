@@ -133,9 +133,21 @@ func (api *SuperAPI) groupsPOSTHandler(c *gin.Context) {
 }
 
 func (api *SuperAPI) groupsGETHandler(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, errorResponseJSON{
-		"Not implemented (yet)", "",
-	})
+	var group *Group
+	var err error
+
+	group, err = group.GetByName(api.DB, c.Param("name"))
+	if err != nil {
+		if _, ok := err.(*errorGroupNotFound); ok {
+			c.JSON(http.StatusNotFound, errorResponseJSON{
+				"Group not found", err.Error(),
+			})
+		} else {
+			panic(err)
+		}
+	} else {
+		c.JSON(http.StatusOK, group)
+	}
 }
 
 func (api *SuperAPI) groupsPUTHandler(c *gin.Context) {
