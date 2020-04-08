@@ -70,8 +70,11 @@ DB_HOST=db DB_USER=user DB_PASS=pass go test -v ./... -tags sql
     - [X] GET
 - [X] GET filters (by type, name, uuid)
 - [X] DELETE Super
-- [ ] Implement Groups
+- [X] Implement Groups
     - [X] Group struct
-    - [ ] POST New Group
-    - [ ] GET Group
-    - [ ] PUT Group
+    - [X] POST New Group
+    - [X] GET Group
+- [ ] Specifics
+    - [ ] GET super retrieves List of Groups
+    - [ ] GET super retrieves number of relatives
+    - [ ] Create a Super(Hero/Vilan) by name only

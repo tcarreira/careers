@@ -127,9 +127,29 @@ func (api *SuperAPI) supersDeleteHandler(c *gin.Context) {
 }
 
 func (api *SuperAPI) groupsPOSTHandler(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, errorResponseJSON{
-		"Not implemented (yet)", "",
-	})
+	group := Group{}
+
+	if err := c.ShouldBindJSON(&group); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponseJSON{
+			"Error processing the payload",
+			err.Error(),
+		})
+		return
+	}
+
+	if group, err := group.Create(api.DB); err != nil {
+		if _, ok := err.(*errorGroupAlreadyExists); ok {
+			c.JSON(http.StatusConflict, errorResponseJSON{
+				"Group already exists - update it instead",
+				err.Error(),
+			})
+		} else {
+			panic(err)
+		}
+	} else {
+		c.JSON(http.StatusCreated, group)
+	}
+
 }
 
 func (api *SuperAPI) groupsGETHandler(c *gin.Context) {
