@@ -27,17 +27,7 @@ type errorResponseJSON struct {
 	Error   string `json:"error,omitempty"`
 }
 
-func (api *SuperAPI) supersPOSTHandler(c *gin.Context) {
-	super := Super{}
-
-	if err := c.ShouldBindJSON(&super); err != nil {
-		c.JSON(http.StatusBadRequest, errorResponseJSON{
-			"Error processing the payload",
-			err.Error(),
-		})
-		return
-	}
-
+func (api *SuperAPI) handleSuperCreate(c *gin.Context, super *Super) {
 	if _, err := super.Create(api.DB); err != nil {
 		if _, ok := err.(*errorSuperAlreadyExists); ok {
 			c.JSON(http.StatusConflict, errorResponseJSON{
@@ -50,7 +40,51 @@ func (api *SuperAPI) supersPOSTHandler(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusCreated, super)
 	}
+}
 
+func (api *SuperAPI) handleSuperBindingJSON(c *gin.Context) (*Super, bool) {
+	super := Super{}
+
+	if err := c.ShouldBindJSON(&super); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponseJSON{
+			"Error processing the payload",
+			err.Error(),
+		})
+		return &super, false
+	}
+	return &super, true
+}
+
+func (api *SuperAPI) superHeroPOSTHandler(c *gin.Context) {
+
+	super, ok := api.handleSuperBindingJSON(c)
+	if !ok {
+		return
+	}
+	super.Type = "HERO"
+
+	api.handleSuperCreate(c, super)
+}
+
+func (api *SuperAPI) superVilanPOSTHandler(c *gin.Context) {
+
+	super, ok := api.handleSuperBindingJSON(c)
+	if !ok {
+		return
+	}
+	super.Type = "VILAN"
+
+	api.handleSuperCreate(c, super)
+}
+
+func (api *SuperAPI) supersPOSTHandler(c *gin.Context) {
+
+	super, ok := api.handleSuperBindingJSON(c)
+	if !ok {
+		return
+	}
+
+	api.handleSuperCreate(c, super)
 }
 
 // supersGETHandler handles GET Requests.

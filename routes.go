@@ -19,6 +19,9 @@ func setRoutes(s *Server) *gin.Engine {
 			Router: s.Router,
 		}
 
+		v1.POST("/super-hero", api.superHeroPOSTHandler)
+		v1.POST("/super-vilan", api.superVilanPOSTHandler)
+
 		v1.POST("/supers", api.supersPOSTHandler)
 		v1.GET("/supers", api.supersGETHandler)
 		v1.GET("/supers/:id", api.supersGETHandler)
