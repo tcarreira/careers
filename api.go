@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -145,7 +145,7 @@ func (api *SuperAPI) groupsPOSTHandler(c *gin.Context) {
 				err.Error(),
 			})
 		} else if _, ok := err.(*errorGroupSuperRelation); ok {
-			fmt.Println("Found some non-fatal errors. Will log and ignore:", err.Error())
+			log.Println("Found some non-fatal errors. Will log and ignore:", err.Error())
 		} else {
 			panic(err)
 		}

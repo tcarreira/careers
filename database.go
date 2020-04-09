@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -30,7 +30,7 @@ func (s *Server) setupDatabase() *Server {
 	for i := 0; i < maxTries; i++ {
 		_, err := s.DB.Exec("SELECT 1")
 		if err != nil {
-			fmt.Println("Waiting for Database to be available #count", i, "/", maxTries)
+			log.Println("Waiting for Database to be available #count", i, "/", maxTries)
 			time.Sleep(1 * time.Second)
 		}
 	}
@@ -51,10 +51,10 @@ func (s *Server) DBCreateSchema() *Server {
 		(*Group)(nil),
 		(*GroupSuper)(nil),
 	} {
-		fmt.Printf("Creating table for %T\n", model)
+		log.Printf("Creating table for %T\n", model)
 		err := s.DB.CreateTable(model, &orm.CreateTableOptions{IfNotExists: true})
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			os.Exit(2)
 		}
 	}
@@ -71,7 +71,7 @@ func (s *Server) dbDropSchema() *Server {
 	} {
 		err := s.DB.DropTable(model, &orm.DropTableOptions{IfExists: true})
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			os.Exit(2)
 		}
 	}
@@ -80,7 +80,7 @@ func (s *Server) dbDropSchema() *Server {
 
 // DBMigrate performs database migrations (not implemented)
 func (s *Server) DBMigrate() {
-	fmt.Println("This will perform Database migrations")
+	log.Println("This will perform Database migrations")
 }
 
 // setupTestDatabase should be used only by tests

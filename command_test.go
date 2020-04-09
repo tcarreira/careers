@@ -1,8 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -13,9 +19,9 @@ type testCommandLine struct {
 	osArgs      []string
 }
 
-func (c *testCommandLine) usagePrint()      { c.Called() }
-func (c *testCommandLine) adminUsagePrint() { c.Called() }
-func (c *testCommandLine) exit(ret int)     { c.Called(ret) }
+func (c *testCommandLine) usagePrint(logger *log.Logger)      { c.Called() }
+func (c *testCommandLine) adminUsagePrint(logger *log.Logger) { c.Called() }
+func (c *testCommandLine) exit(ret int)                       { c.Called(ret) }
 func (c *testCommandLine) getArg(idx int) string {
 	c.Called(idx)
 	return c.osArgs[idx]
@@ -67,4 +73,24 @@ func TestExecutingCommandAdmin(t *testing.T) {
 	parseCommandLine(&testComm, &s)
 
 	testComm.AssertExpectations(t)
+}
+
+func TestCommandLine_usagePrint(t *testing.T) {
+	var buf bytes.Buffer
+	logger := log.New(&buf, "", 0)
+	testComm := CommandLine{}
+
+	testComm.usagePrint(logger)
+
+	assert.Contains(t, buf.String(), fmt.Sprintf("Usage: %s COMMAND", filepath.Base(os.Args[0])))
+}
+
+func TestCommandLine_adminUsagePrint(t *testing.T) {
+	var buf bytes.Buffer
+	logger := log.New(&buf, "", 0)
+	testComm := CommandLine{}
+
+	testComm.adminUsagePrint(logger)
+
+	assert.Contains(t, buf.String(), fmt.Sprintf("Usage: %s admin COMMAND", filepath.Base(os.Args[0])))
 }

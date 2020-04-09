@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 )
 
 // CommandLiner is an interface for methods used by ParseCommandLine
 type CommandLiner interface {
-	usagePrint()
-	adminUsagePrint()
+	usagePrint(logger *log.Logger)
+	adminUsagePrint(logger *log.Logger)
 	exit(ret int)
 	getArg(idx int) string
 	lenArgs() int
@@ -19,21 +19,21 @@ type CommandLiner interface {
 type CommandLine struct{}
 
 // usagePrint prints usage
-func (c CommandLine) usagePrint() {
-	fmt.Println("Usage:", filepath.Base(os.Args[0]), "COMMAND")
-	fmt.Println("")
-	fmt.Println("COMMAND:")
-	fmt.Println("	admin: call admin actions")
-	fmt.Println("	serve: start HTTP server")
+func (c CommandLine) usagePrint(logger *log.Logger) {
+	logger.Println("Usage:", filepath.Base(os.Args[0]), "COMMAND")
+	logger.Println("")
+	logger.Println("COMMAND:")
+	logger.Println("	admin: call admin actions")
+	logger.Println("	serve: start HTTP server")
 }
 
 // adminUsagePrint prints usage for admin sub-command
-func (c CommandLine) adminUsagePrint() {
-	fmt.Println("Usage:", filepath.Base(os.Args[0]), "admin", "COMMAND")
-	fmt.Println("")
-	fmt.Println("COMMAND:")
-	fmt.Println("	schema: create database schema")
-	fmt.Println("	migrate: perform database migrations (not implemented)")
+func (c CommandLine) adminUsagePrint(logger *log.Logger) {
+	logger.Println("Usage:", filepath.Base(os.Args[0]), "admin", "COMMAND")
+	logger.Println("")
+	logger.Println("COMMAND:")
+	logger.Println("	schema: create database schema")
+	logger.Println("	migrate: perform database migrations (not implemented)")
 }
 
 // exit just calls os.Exit()
@@ -52,9 +52,10 @@ func (c CommandLine) lenArgs() int {
 }
 
 func parseCommandLine(comm CommandLiner, s *Server) {
+	logger := log.New(os.Stdout, "", 0)
 
 	if comm.lenArgs() < 2 {
-		comm.usagePrint()
+		comm.usagePrint(logger)
 		comm.exit(1)
 	} else {
 		switch comm.getArg(1) {
@@ -64,7 +65,7 @@ func parseCommandLine(comm CommandLiner, s *Server) {
 
 		case "admin":
 			if comm.lenArgs() < 3 {
-				comm.adminUsagePrint()
+				comm.adminUsagePrint(logger)
 				comm.exit(1)
 			} else {
 
@@ -74,13 +75,13 @@ func parseCommandLine(comm CommandLiner, s *Server) {
 				case "migrate":
 					s.DBMigrate()
 				default:
-					comm.adminUsagePrint()
+					comm.adminUsagePrint(logger)
 					comm.exit(1)
 				}
 			}
 
 		default:
-			comm.usagePrint()
+			comm.usagePrint(logger)
 			comm.exit(1)
 		}
 	}
