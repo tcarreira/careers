@@ -15,7 +15,200 @@
     },
     "basePath": "/api/v1",
     "paths": {
+        "/groups": {
+            "post": {
+                "description": "Create new Group of Supers",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create new Group of Supers",
+                "parameters": [
+                    {
+                        "description": "Group definition. Supers is a list os their names",
+                        "name": "super",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Group"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Group was created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Group"
+                        }
+                    },
+                    "409": {
+                        "description": "Group name already exists",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/{name}": {
+            "get": {
+                "description": "Get Group by name",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get Group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Group Name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Group",
+                        "schema": {
+                            "$ref": "#/definitions/models.Group"
+                        }
+                    },
+                    "404": {
+                        "description": "Group Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
+                    }
+                }
+            }
+        },
         "/super-hero": {
+            "post": {
+                "description": "Create new Super Hero by name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create new Super Hero",
+                "parameters": [
+                    {
+                        "description": "super hero name",
+                        "name": "super",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.exampleSuperHeroVilanJSON"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Super was created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Super"
+                        }
+                    },
+                    "409": {
+                        "description": "Super already exists",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
+                    }
+                }
+            }
+        },
+        "/super-vilan": {
+            "post": {
+                "description": "Create new Super Vilan by name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create new Super Vilan",
+                "parameters": [
+                    {
+                        "description": "super vilan name",
+                        "name": "super",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.exampleSuperHeroVilanJSON"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Super was created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Super"
+                        }
+                    },
+                    "409": {
+                        "description": "Super already exists",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
+                    }
+                }
+            }
+        },
+        "/supers": {
+            "get": {
+                "description": "Get list of Supers by filtering by name, uuid or type",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get list of Supers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Super(hero/vilan) Name (case-sensitive)",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Super(hero/vilan) UUID (case-insensitive)",
+                        "name": "uuid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Super(hero/vilan) Type (HERO / VILAN) (case-insensitive)",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of Supers",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Super"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error parsing payload",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create new Super",
                 "consumes": [
@@ -27,12 +220,12 @@
                 "summary": "Create new Super (hero/vilan)",
                 "parameters": [
                     {
-                        "description": "super hero name",
+                        "description": "super hero (mandatory: name and type)",
                         "name": "super",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.exampleSuperHeroVilanJSON"
+                            "$ref": "#/definitions/server.exampleSuperJSON"
                         }
                     }
                 ],
@@ -40,7 +233,84 @@
                     "201": {
                         "description": "Super was created",
                         "schema": {
-                            "$ref": "#/definitions/main.Super"
+                            "$ref": "#/definitions/models.Super"
+                        }
+                    },
+                    "409": {
+                        "description": "Super already exists",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
+                    }
+                }
+            }
+        },
+        "/supers/{id}": {
+            "get": {
+                "description": "Get a Super by name or uuid",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get Super",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Super's Name or UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Super",
+                        "schema": {
+                            "$ref": "#/definitions/models.Super"
+                        }
+                    },
+                    "404": {
+                        "description": "Super Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a by name or uuid",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Delete a Super",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Super's Name or UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successfully deleted"
+                    },
+                    "404": {
+                        "description": "Super Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
                         }
                     }
                 }
@@ -48,7 +318,24 @@
         }
     },
     "definitions": {
-        "main.Super": {
+        "models.Group": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "supers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tableName": {
+                    "type": "object"
+                }
+            }
+        },
+        "models.Super": {
             "type": "object",
             "properties": {
                 "fullname": {
@@ -59,7 +346,11 @@
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "group1",
+                        "group2"
+                    ]
                 },
                 "image_url": {
                     "type": "string",
@@ -98,7 +389,27 @@
                 }
             }
         },
-        "main.exampleSuperHeroVilanJSON": {
+        "server.errorResponseJSON": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "server.exampleSuperHeroVilanJSON": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "name1"
+                }
+            }
+        },
+        "server.exampleSuperJSON": {
             "type": "object",
             "properties": {
                 "name": {

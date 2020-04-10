@@ -78,3 +78,12 @@ DB_HOST=db DB_USER=user DB_PASS=pass go test -v ./... -tags sql
     - [X] GET super retrieves List of Groups
     - [X] GET super retrieves number of relatives
     - [X] Create a Super(Hero/Vilan) by name only
+
+
+# Testing 
+
+## Setup Environment
+with docker-compose
+```
+docker-compose up --build -d
+```

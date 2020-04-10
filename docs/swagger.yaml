@@ -1,11 +1,25 @@
 basePath: /api/v1
 definitions:
-  main.Super:
+  models.Group:
+    properties:
+      name:
+        type: string
+      supers:
+        items:
+          type: string
+        type: array
+      tableName:
+        type: object
+    type: object
+  models.Super:
     properties:
       fullname:
         example: SuperHero1's Full Name
         type: string
       groups:
+        example:
+        - group1
+        - group2
         items:
           type: string
         type: array
@@ -36,7 +50,20 @@ definitions:
         example: 47c0df01-a47d-497f-808d-181021f01c76
         type: string
     type: object
-  main.exampleSuperHeroVilanJSON:
+  server.errorResponseJSON:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  server.exampleSuperHeroVilanJSON:
+    properties:
+      name:
+        example: name1
+        type: string
+    type: object
+  server.exampleSuperJSON:
     properties:
       name:
         example: name1
@@ -57,24 +84,201 @@ info:
   title: Superhero API
   version: "1.0"
 paths:
+  /groups:
+    post:
+      consumes:
+      - application/json
+      description: Create new Group of Supers
+      parameters:
+      - description: Group definition. Supers is a list os their names
+        in: body
+        name: super
+        required: true
+        schema:
+          $ref: '#/definitions/models.Group'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Group was created
+          schema:
+            $ref: '#/definitions/models.Group'
+        "409":
+          description: Group name already exists
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
+      summary: Create new Group of Supers
+  /groups/{name}:
+    get:
+      description: Get Group by name
+      parameters:
+      - description: Group Name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Group
+          schema:
+            $ref: '#/definitions/models.Group'
+        "404":
+          description: Group Not Found
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
+        "500":
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
+      summary: Get Group
   /super-hero:
     post:
       consumes:
       - application/json
-      description: Create new Super
+      description: Create new Super Hero by name
       parameters:
       - description: super hero name
         in: body
         name: super
         required: true
         schema:
-          $ref: '#/definitions/main.exampleSuperHeroVilanJSON'
+          $ref: '#/definitions/server.exampleSuperHeroVilanJSON'
       produces:
       - application/json
       responses:
         "201":
           description: Super was created
           schema:
-            $ref: '#/definitions/main.Super'
+            $ref: '#/definitions/models.Super'
+        "409":
+          description: Super already exists
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
+      summary: Create new Super Hero
+  /super-vilan:
+    post:
+      consumes:
+      - application/json
+      description: Create new Super Vilan by name
+      parameters:
+      - description: super vilan name
+        in: body
+        name: super
+        required: true
+        schema:
+          $ref: '#/definitions/server.exampleSuperHeroVilanJSON'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Super was created
+          schema:
+            $ref: '#/definitions/models.Super'
+        "409":
+          description: Super already exists
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
+      summary: Create new Super Vilan
+  /supers:
+    get:
+      description: Get list of Supers by filtering by name, uuid or type
+      parameters:
+      - description: Super(hero/vilan) Name (case-sensitive)
+        in: query
+        name: name
+        type: string
+      - description: Super(hero/vilan) UUID (case-insensitive)
+        in: query
+        name: uuid
+        type: string
+      - description: Super(hero/vilan) Type (HERO / VILAN) (case-insensitive)
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of Supers
+          schema:
+            items:
+              $ref: '#/definitions/models.Super'
+            type: array
+        "400":
+          description: Error parsing payload
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
+      summary: Get list of Supers
+    post:
+      consumes:
+      - application/json
+      description: Create new Super
+      parameters:
+      - description: 'super hero (mandatory: name and type)'
+        in: body
+        name: super
+        required: true
+        schema:
+          $ref: '#/definitions/server.exampleSuperJSON'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Super was created
+          schema:
+            $ref: '#/definitions/models.Super'
+        "409":
+          description: Super already exists
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
       summary: Create new Super (hero/vilan)
+  /supers/{id}:
+    delete:
+      description: Delete a by name or uuid
+      parameters:
+      - description: Super's Name or UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Successfully deleted
+        "404":
+          description: Super Not Found
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
+        "500":
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
+      summary: Delete a Super
+    get:
+      description: Get a Super by name or uuid
+      parameters:
+      - description: Super's Name or UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Super
+          schema:
+            $ref: '#/definitions/models.Super'
+        "404":
+          description: Super Not Found
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
+        "500":
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
+      summary: Get Super
 swagger: "2.0"
