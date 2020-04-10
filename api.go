@@ -182,7 +182,17 @@ func (api *SuperAPI) supersPUTHandler(c *gin.Context) {
 	})
 }
 
-func (api *SuperAPI) supersDeleteHandler(c *gin.Context) {
+// SupersDeleteHandler Delete a Super @ /supers/:name...
+// ---
+// @Summary Delete a Super
+// @Description Delete a by name or uuid
+// @Produce json
+// @Param id path string true "Super's Name or UUID"
+// @Success 204
+// @Failure 404 {object} errorResponseJSON "Super Not Found"
+// @Failure 500 {object} errorResponseJSON "Unexpected Error"
+// @Router /supers/{id} [get]
+func (api *SuperAPI) SupersDeleteHandler(c *gin.Context) {
 	super := new(Super)
 	err := super.DeleteByNameOrUUID(api.DB, c.Param("id"))
 
@@ -285,7 +295,7 @@ func setRoutes(s *Server) *gin.Engine {
 		v1.GET("/supers", api.SupersGETFiltersHandler)
 		v1.GET("/supers/:id", api.SupersGETByIDHandler)
 		v1.PUT("/supers/:id", api.supersPUTHandler)
-		v1.DELETE("/supers/:id", api.supersDeleteHandler)
+		v1.DELETE("/supers/:id", api.SupersDeleteHandler)
 
 		v1.POST("/groups", api.groupsPOSTHandler)
 		v1.GET("/groups/:name", api.groupsGETHandler)
