@@ -407,10 +407,10 @@ func setRoutes(r *gin.Engine, db *pg.DB) *gin.Engine {
 				Router: r,
 			}
 
-			groups.POST("/groups", api.GroupsPOSTHandler)
-			groups.GET("/groups/:name", api.GroupsGETHandler)
-			groups.PUT("/groups/:name", api.GroupsPUTHandler)
-			groups.DELETE("/groups/:name", api.GroupsDeleteHandler)
+			groups.POST("/", api.GroupsPOSTHandler)
+			groups.GET("/:name", api.GroupsGETHandler)
+			groups.PUT("/:name", api.GroupsPUTHandler)
+			groups.DELETE("/:name", api.GroupsDeleteHandler)
 		}
 	}
 
