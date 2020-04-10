@@ -48,6 +48,12 @@
                         "schema": {
                             "$ref": "#/definitions/server.errorResponseJSON"
                         }
+                    },
+                    "500": {
+                        "description": "Unexpected Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
                     }
                 }
             }
@@ -120,6 +126,12 @@
                     },
                     "409": {
                         "description": "Super already exists",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponseJSON"
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected error",
                         "schema": {
                             "$ref": "#/definitions/server.errorResponseJSON"
                         }
@@ -322,16 +334,17 @@
             "type": "object",
             "properties": {
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "group1"
                 },
                 "supers": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
-                },
-                "tableName": {
-                    "type": "object"
+                    },
+                    "example": [
+                        "name1"
+                    ]
                 }
             }
         },

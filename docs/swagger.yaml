@@ -3,13 +3,14 @@ definitions:
   models.Group:
     properties:
       name:
+        example: group1
         type: string
       supers:
+        example:
+        - name1
         items:
           type: string
         type: array
-      tableName:
-        type: object
     type: object
   models.Super:
     properties:
@@ -107,6 +108,10 @@ paths:
           description: Group name already exists
           schema:
             $ref: '#/definitions/server.errorResponseJSON'
+        "500":
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
       summary: Create new Group of Supers
   /groups/{name}:
     get:
@@ -154,6 +159,10 @@ paths:
             $ref: '#/definitions/models.Super'
         "409":
           description: Super already exists
+          schema:
+            $ref: '#/definitions/server.errorResponseJSON'
+        "500":
+          description: Unexpected error
           schema:
             $ref: '#/definitions/server.errorResponseJSON'
       summary: Create new Super Hero
