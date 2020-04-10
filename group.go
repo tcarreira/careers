@@ -9,28 +9,11 @@ import (
 
 // Group represents a group of supers
 type Group struct {
-	tableName struct{} `pg:"alias:g"`
-	ID        uint64   `json:"-" sql:",pk"`
-	Name      string   `json:"name" sql:",unique,notnull"`
-	Supers    []Super  `json:"-" pg:"many2many:group_supers,joinFK:super_id"`
-}
-
-// MarshalJSON will render a Super JSON with a []string of group names instead of []Group
-func (g *Group) MarshalJSON() ([]byte, error) {
-	type Alias Group
-
-	supersNames := make([]string, 0)
-	for _, super := range g.Supers {
-		supersNames = append(supersNames, super.Name)
-	}
-
-	return json.Marshal(&struct {
-		*Alias
-		Supers []string `json:"supers"`
-	}{
-		Alias:  (*Alias)(g),
-		Supers: supersNames,
-	})
+	tableName  struct{} `pg:"alias:g"`
+	ID         uint64   `json:"-" sql:",pk"`
+	Name       string   `json:"name" sql:",unique,notnull"`
+	Supers     []Super  `json:"-" pg:"many2many:group_supers,joinFK:super_id"`
+	SupersList []string `json:"supers" sql:"-" `
 }
 
 // UnmarshalJSON will instantiate a Group from a JSON, where Supers is a []string of Super names
@@ -144,6 +127,11 @@ func (g *Group) GetByName(db *pg.DB, name string) (*Group, error) {
 			return &group, &errorGroupNotFound{err.Error()}
 		}
 		return &group, err
+	}
+
+	// create the Super Names List as []string
+	for _, super := range group.Supers {
+		group.SupersList = append(group.SupersList, super.Name)
 	}
 
 	return &group, nil
