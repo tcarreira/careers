@@ -10,12 +10,12 @@ import (
 )
 
 func TestDatabaseSimpleSelect(t *testing.T) {
-	d := db.SetupDatabase()
+	d := SetupDatabase()
 
 	var num int
 
 	// Simple params.
-	_, err := s.DB.Query(pg.Scan(&num), "SELECT ?", 42)
+	_, err := d.Query(pg.Scan(&num), "SELECT ?", 42)
 	if err != nil {
 		panic(err)
 	}
@@ -23,8 +23,5 @@ func TestDatabaseSimpleSelect(t *testing.T) {
 }
 
 func TestDBCreateSchema(t *testing.T) {
-	d := db.SetupDatabase()
-
-	s.dbDropSchema()
-	s.DBCreateSchema()
+	_ = SetupEmptyTestDatabase()
 }

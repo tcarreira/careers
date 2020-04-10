@@ -42,7 +42,7 @@ func SetupDatabase() *pg.DB {
 // SetupEmptyTestDatabase should be used only by tests
 func SetupEmptyTestDatabase() *pg.DB {
 	db := SetupDatabase()
-	dropSchema(db)
+	DropSchema(db)
 	CreateSchema(db)
 
 	return db
@@ -70,8 +70,8 @@ func CreateSchema(db *pg.DB) {
 	}
 }
 
-// dropSchema should be used only by tests
-func dropSchema(db *pg.DB) {
+// DropSchema should be used only by tests
+func DropSchema(db *pg.DB) {
 	for _, model := range []interface{}{
 		(*Super)(nil),
 		(*Group)(nil),
