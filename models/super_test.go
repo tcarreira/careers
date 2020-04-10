@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"encoding/json"
@@ -11,8 +11,7 @@ func TestSuper_Create(t *testing.T) {
 	var got *Super
 	var err error
 
-	s := Server{}
-	s.setupEmptyTestDatabase()
+	d := SetupEmptyTestDatabase()
 
 	super1 := Super{
 		Type: "Hero",
@@ -31,7 +30,7 @@ func TestSuper_Create(t *testing.T) {
 
 	t.Run("TestSuper_Create - Create with Type and Name", func(t *testing.T) {
 
-		got, err = super1.Create(s.DB)
+		got, err = super1.Create(d)
 
 		assert.NoError(t, err)
 		assert.Equal(t, "HERO", got.Type) // converts Hero -> HERO
@@ -42,13 +41,13 @@ func TestSuper_Create(t *testing.T) {
 
 	t.Run("TestSuper_Create - Repeat create - should fail", func(t *testing.T) {
 		// Try again the same
-		_, err = super1.Create(s.DB)
+		_, err = super1.Create(d)
 		assert.Error(t, err)
 	})
 
 	t.Run("TestSuper_Create - Create with all fields", func(t *testing.T) {
 
-		got, err = super2.Create(s.DB)
+		got, err = super2.Create(d)
 
 		assert.NoError(t, err)
 		assert.Equal(t, "VILAN", got.Type) // converts Hero -> HERO
@@ -68,25 +67,24 @@ func TestSuper_Create(t *testing.T) {
 			Type: "Something",
 		}
 
-		_, err = badSuper.Create(s.DB)
+		_, err = badSuper.Create(d)
 
 		assert.Error(t, err)
 	})
 }
 
-func TestSuper_getByNameOrUUID_byUUID(t *testing.T) {
+func TestSuper_GetByNameOrUUID_byUUID(t *testing.T) {
 	var got *Super
 	var err error
 
-	s := Server{}
-	s.setupEmptyTestDatabase()
+	d := SetupEmptyTestDatabase()
 
 	supers := []Super{
-		Super{
+		{
 			Type: "Hero",
 			Name: "Test1",
 		},
-		Super{
+		{
 			Type: "Vilan",
 			Name: "super2",
 			UUID: "40000001-a47d-497f-808d-181021f01c76",
@@ -94,25 +92,25 @@ func TestSuper_getByNameOrUUID_byUUID(t *testing.T) {
 	}
 
 	for i := range supers {
-		supers[i].Create(s.DB)
+		supers[i].Create(d)
 	}
 
-	t.Run("TestSuper_getByNameOrUUID - by UUID", func(t *testing.T) {
-		got, err = got.getByNameOrUUID(s.DB, "40000001-a47d-497f-808d-181021f01c76")
+	t.Run("TestSuper_GetByNameOrUUID - by UUID", func(t *testing.T) {
+		got, err = got.GetByNameOrUUID(d, "40000001-a47d-497f-808d-181021f01c76")
 		assert.NoError(t, err)
 		assert.Equal(t, "VILAN", got.Type)
 		assert.Equal(t, "super2", got.Name)
 	})
 
-	t.Run("TestSuper_getByNameOrUUID - by Name", func(t *testing.T) {
-		got, err = got.getByNameOrUUID(s.DB, "Test1")
+	t.Run("TestSuper_GetByNameOrUUID - by Name", func(t *testing.T) {
+		got, err = got.GetByNameOrUUID(d, "Test1")
 		assert.NoError(t, err)
 		assert.Equal(t, "HERO", got.Type)
 		assert.Equal(t, "Test1", got.Name)
 	})
 
-	t.Run("TestSuper_getByNameOrUUID - does not exist", func(t *testing.T) {
-		_, err = got.getByNameOrUUID(s.DB, "12356890")
+	t.Run("TestSuper_GetByNameOrUUID - does not exist", func(t *testing.T) {
+		_, err = got.GetByNameOrUUID(d, "12356890")
 		assert.Error(t, err)
 	})
 }
@@ -120,15 +118,14 @@ func TestSuper_getByNameOrUUID_byUUID(t *testing.T) {
 func TestSuper_DeleteByNameOrUUID(t *testing.T) {
 	var err error
 
-	s := Server{}
-	s.setupEmptyTestDatabase()
+	d := SetupEmptyTestDatabase()
 
 	supers := []Super{
-		Super{
+		{
 			Type: "Hero",
 			Name: "Test1",
 		},
-		Super{
+		{
 			Type: "Vilan",
 			Name: "super2",
 			UUID: "40000002-a47d-497f-808d-181021f01c76",
@@ -136,29 +133,29 @@ func TestSuper_DeleteByNameOrUUID(t *testing.T) {
 	}
 
 	for i := range supers {
-		supers[i].Create(s.DB)
+		supers[i].Create(d)
 	}
 
 	t.Run("TestSuper_DeleteByNameOrUUID - by Name", func(t *testing.T) {
-		err = new(Super).DeleteByNameOrUUID(s.DB, "Test1")
+		err = new(Super).DeleteByNameOrUUID(d, "Test1")
 		assert.NoError(t, err)
 	})
 
 	t.Run("TestSuper_DeleteByNameOrUUID - by Name - same again", func(t *testing.T) {
-		err = new(Super).DeleteByNameOrUUID(s.DB, "Test1")
+		err = new(Super).DeleteByNameOrUUID(d, "Test1")
 		assert.Error(t, err)
-		assert.IsType(t, &errorSuperNotFound{""}, err)
+		assert.IsType(t, &ErrorSuperNotFound{""}, err)
 	})
 
 	t.Run("TestSuper_DeleteByNameOrUUID - by UUID", func(t *testing.T) {
-		err = new(Super).DeleteByNameOrUUID(s.DB, "40000002-a47d-497f-808d-181021f01c76")
+		err = new(Super).DeleteByNameOrUUID(d, "40000002-a47d-497f-808d-181021f01c76")
 		assert.NoError(t, err)
 	})
 	t.Run("TestSuper_DeleteByNameOrUUID - by UUID - same again", func(t *testing.T) {
 		// Try again the same
-		err = new(Super).DeleteByNameOrUUID(s.DB, "40000002-a47d-497f-808d-181021f01c76")
+		err = new(Super).DeleteByNameOrUUID(d, "40000002-a47d-497f-808d-181021f01c76")
 		assert.Error(t, err)
-		assert.IsType(t, &errorSuperNotFound{""}, err)
+		assert.IsType(t, &ErrorSuperNotFound{""}, err)
 	})
 }
 
@@ -166,37 +163,36 @@ func TestSuper_ReadAll(t *testing.T) {
 	var got []Super
 	var err error
 
-	s := Server{}
-	s.setupEmptyTestDatabase()
+	d := SetupEmptyTestDatabase()
 
 	supers := []Super{
-		Super{
+		{
 			Type: "HERO",
 			Name: "h1",
 			UUID: "47c0df01-a47d-497f-808d-181021f01c76",
 		},
-		Super{
+		{
 			Type: "HERO",
 			Name: "h2",
 		},
-		Super{
+		{
 			Type: "HERO",
 			Name: "h3",
 		},
-		Super{
+		{
 			Type: "VILAN",
 			Name: "v1",
 		},
 	}
 
 	for i := range supers {
-		supers[i].Create(s.DB)
+		supers[i].Create(d)
 	}
 
 	// perform tests on previous data
 	t.Run("Test ReadAll - no filters", func(t *testing.T) {
 		super := Super{}
-		got = super.ReadAll(s.DB)
+		got = super.ReadAll(d)
 
 		assert.NoError(t, err)
 		assert.EqualValues(t, 4, len(got))
@@ -221,7 +217,7 @@ func TestSuper_ReadAll(t *testing.T) {
 
 	t.Run("Test ReadAll - filter Type", func(t *testing.T) {
 		super := Super{Type: "HERO"}
-		got = super.ReadAll(s.DB)
+		got = super.ReadAll(d)
 
 		assert.NoError(t, err)
 		assert.EqualValues(t, 3, len(got))
@@ -245,7 +241,7 @@ func TestSuper_ReadAll(t *testing.T) {
 
 	t.Run("Test ReadAll - filter Name", func(t *testing.T) {
 		super := Super{Name: "v1"}
-		got = super.ReadAll(s.DB)
+		got = super.ReadAll(d)
 
 		assert.NoError(t, err)
 		assert.EqualValues(t, 1, len(got))
@@ -267,7 +263,7 @@ func TestSuper_ReadAll(t *testing.T) {
 
 	t.Run("Test ReadAll - filter UUID", func(t *testing.T) {
 		super := Super{UUID: "47c0df01-a47d-497f-808d-181021f01c76"}
-		got = super.ReadAll(s.DB)
+		got = super.ReadAll(d)
 
 		assert.NoError(t, err)
 		assert.EqualValues(t, 1, len(got))
@@ -292,31 +288,30 @@ func TestSuper_ReadAll(t *testing.T) {
 }
 
 func TestSuper_GroupsRelatives(t *testing.T) {
-	s := Server{}
-	s.setupEmptyTestDatabase()
+	d := SetupEmptyTestDatabase()
 
 	supers := []Super{
-		Super{Type: "HERO", Name: "main", UUID: "41f0bc0e-89f7-4ea7-a4f5-9d08e5383b9c"},
-		Super{Type: "HERO", Name: "rel1"},
-		Super{Type: "HERO", Name: "rel2"},
-		Super{Type: "HERO", Name: "rel3"},
+		{Type: "HERO", Name: "main", UUID: "41f0bc0e-89f7-4ea7-a4f5-9d08e5383b9c"},
+		{Type: "HERO", Name: "rel1"},
+		{Type: "HERO", Name: "rel2"},
+		{Type: "HERO", Name: "rel3"},
 	}
 	for i := range supers {
-		supers[i].Create(s.DB)
+		supers[i].Create(d)
 	}
 	groups := []Group{
-		Group{Name: "g1", Supers: supers[0:3]},
-		Group{Name: "g2", Supers: supers[1:4]},
-		Group{Name: "g3", Supers: supers[0:4]},
+		{Name: "g1", Supers: supers[0:3]},
+		{Name: "g2", Supers: supers[1:4]},
+		{Name: "g3", Supers: supers[0:4]},
 	}
 	for i := range groups {
-		groups[i].Create(s.DB)
+		groups[i].Create(d)
 	}
 
 	t.Run("TestSuper_GroupsRelatives - Marshal Super JSON", func(t *testing.T) {
 		// This test is very prone to errors
 		// special attention to "relatives_count": and "groups":
-		super, _ := new(Super).getByNameOrUUID(s.DB, supers[0].Name)
+		super, _ := new(Super).GetByNameOrUUID(d, supers[0].Name)
 
 		var superJSON []byte
 		superJSON, err := json.Marshal(super)
@@ -329,7 +324,7 @@ func TestSuper_GroupsRelatives(t *testing.T) {
 
 	})
 	t.Run("TestSuper_GroupsRelatives - RelativesCount", func(t *testing.T) {
-		super, err := new(Super).getByNameOrUUID(s.DB, supers[0].Name)
+		super, err := new(Super).GetByNameOrUUID(d, supers[0].Name)
 
 		assert.NoError(t, err)
 		assert.Equal(t, int(3), super.RelativesCount)
@@ -340,7 +335,7 @@ func TestSuper_GroupsRelatives(t *testing.T) {
 		// This test is very prone to errors
 		// special attention to "relatives_count": and "groups":
 		super := &Super{Name: supers[0].Name}
-		superList := super.ReadAll(s.DB)
+		superList := super.ReadAll(d)
 
 		var superListJSON []byte
 		superListJSON, err := json.Marshal(superList)

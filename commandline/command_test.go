@@ -1,4 +1,4 @@
-package main
+package commandline
 
 import (
 	"bytes"
@@ -19,9 +19,9 @@ type testCommandLine struct {
 	osArgs      []string
 }
 
-func (c *testCommandLine) usagePrint(logger *log.Logger)      { c.Called() }
-func (c *testCommandLine) serveUsagePrint(logger *log.Logger) { c.Called() }
-func (c *testCommandLine) adminUsagePrint(logger *log.Logger) { c.Called() }
+func (c *testCommandLine) printUsage(logger *log.Logger)      { c.Called() }
+func (c *testCommandLine) printServeUsage(logger *log.Logger) { c.Called() }
+func (c *testCommandLine) printAdminUsage(logger *log.Logger) { c.Called() }
 func (c *testCommandLine) exit(ret int)                       { c.Called(ret) }
 func (c *testCommandLine) getArg(idx int) string {
 	c.Called(idx)
@@ -33,8 +33,6 @@ func (c *testCommandLine) lenArgs() int {
 }
 
 func TestExecutingCommandWithoutArguments(t *testing.T) {
-	s := Server{}
-
 	testComm := testCommandLine{
 		exitRetCode: 1,
 		osArgs: []string{
@@ -44,18 +42,16 @@ func TestExecutingCommandWithoutArguments(t *testing.T) {
 
 	// setup expectations
 	testComm.On("lenArgs").Return(1)
-	testComm.On("usagePrint")
+	testComm.On("printUsage")
 	testComm.On("exit", 1)
 
 	// call the code we are testing
-	parseCommandLine(&testComm, &s)
+	parseCommandLine(&testComm, nil)
 
 	testComm.AssertExpectations(t)
 }
 
 func TestExecutingCommandAdmin(t *testing.T) {
-	s := Server{}
-
 	testComm := testCommandLine{
 		exitRetCode: 1,
 		osArgs: []string{
@@ -67,31 +63,31 @@ func TestExecutingCommandAdmin(t *testing.T) {
 	// setup expectations
 	testComm.On("lenArgs").Return(2)
 	testComm.On("getArg", 1).Return("admin")
-	testComm.On("adminUsagePrint")
+	testComm.On("printAdminUsage")
 	testComm.On("exit", 1)
 
 	// call the code we are testing
-	parseCommandLine(&testComm, &s)
+	parseCommandLine(&testComm, nil)
 
 	testComm.AssertExpectations(t)
 }
 
-func TestCommandLine_usagePrint(t *testing.T) {
+func TestCommandLine_printUsage(t *testing.T) {
 	var buf bytes.Buffer
 	logger := log.New(&buf, "", 0)
 	testComm := CommandLine{}
 
-	testComm.usagePrint(logger)
+	testComm.printUsage(logger)
 
 	assert.Contains(t, buf.String(), fmt.Sprintf("Usage: %s COMMAND", filepath.Base(os.Args[0])))
 }
 
-func TestCommandLine_adminUsagePrint(t *testing.T) {
+func TestCommandLine_printAdminUsage(t *testing.T) {
 	var buf bytes.Buffer
 	logger := log.New(&buf, "", 0)
 	testComm := CommandLine{}
 
-	testComm.adminUsagePrint(logger)
+	testComm.printAdminUsage(logger)
 
 	assert.Contains(t, buf.String(), fmt.Sprintf("Usage: %s admin COMMAND", filepath.Base(os.Args[0])))
 }

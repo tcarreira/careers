@@ -1,6 +1,6 @@
 // +build sql
 
-package main
+package models
 
 import (
 	"testing"
@@ -51,8 +51,7 @@ func TestGroup_Create(t *testing.T) {
 	var got *Group
 	var err error
 
-	s := Server{}
-	s.setupEmptyTestDatabase()
+	d := SetupEmptyTestDatabase()
 
 	supers := []Super{
 		Super{Type: "HERO", Name: "t1"},
@@ -84,8 +83,7 @@ func TestGroup_Create(t *testing.T) {
 
 func TestGroup_GetByName(t *testing.T) {
 
-	s := Server{}
-	s.setupEmptyTestDatabase()
+	d := SetupEmptyTestDatabase()
 
 	supers := []Super{
 		Super{Type: "HERO", Name: "t1"},
@@ -144,8 +142,7 @@ func TestGroup_GetByName(t *testing.T) {
 }
 
 func TestGroup_GetAllBySuper(t *testing.T) {
-	s := Server{}
-	s.setupEmptyTestDatabase()
+	d := SetupEmptyTestDatabase()
 
 	supers := []Super{
 		Super{Type: "HERO", Name: "s1"},

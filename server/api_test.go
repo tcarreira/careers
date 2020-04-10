@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/json"
@@ -11,12 +11,9 @@ import (
 )
 
 func setupTestRouter() *gin.Engine {
-	s := Server{}
-
 	gin.SetMode(gin.TestMode)
-	s.Router = gin.New()
-
-	return setRoutes(&s)
+	r := gin.New()
+	return setRoutes(r, nil)
 }
 
 func performRequest(r http.Handler, method, path string) *httptest.ResponseRecorder {

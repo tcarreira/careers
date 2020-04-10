@@ -27,7 +27,7 @@ RUN go mod download
 
 # generate REST API documentation and build app
 COPY . .
-RUN swag init -g api.go \
+RUN swag init -g server/api.go \
     && CGO_ENABLED=0 go build -o /superhero
 
 #    ______ _             _ 

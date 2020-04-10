@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"encoding/json"
@@ -47,27 +47,30 @@ type GroupSuper struct {
 	Super     *Super
 }
 
-type errorGroupAlreadyExists struct {
+// ErrorGroupAlreadyExists Group Already Exists - extends error
+type ErrorGroupAlreadyExists struct {
 	s string
 }
 
-func (e *errorGroupAlreadyExists) Error() string {
+func (e *ErrorGroupAlreadyExists) Error() string {
 	return e.s
 }
 
-type errorGroupSuperRelation struct {
+// ErrorGroupSuperRelation  Group Super Relation - extends error
+type ErrorGroupSuperRelation struct {
 	s string
 }
 
-func (e *errorGroupSuperRelation) Error() string {
+func (e *ErrorGroupSuperRelation) Error() string {
 	return e.s
 }
 
-type errorGroupNotFound struct {
+// ErrorGroupNotFound Group Not Found - extends error
+type ErrorGroupNotFound struct {
 	s string
 }
 
-func (e *errorGroupNotFound) Error() string {
+func (e *ErrorGroupNotFound) Error() string {
 	return e.s
 }
 
@@ -77,7 +80,7 @@ func (g *Group) Create(db *pg.DB) (*Group, error) {
 		pgErr, ok := err.(pg.Error)
 		if ok {
 			if pgErr.IntegrityViolation() {
-				return g, &errorGroupAlreadyExists{err.Error()}
+				return g, &ErrorGroupAlreadyExists{err.Error()}
 			}
 		}
 		panic(err)
@@ -89,7 +92,7 @@ func (g *Group) Create(db *pg.DB) (*Group, error) {
 		var err error
 
 		// Get Super from DB
-		s, err = super.getByNameOrUUID(db, super.Name)
+		s, err = super.GetByNameOrUUID(db, super.Name)
 		if err != nil {
 			minorErrors = append(minorErrors,
 				"(super:'"+super.Name+"') "+err.Error(),
@@ -107,7 +110,7 @@ func (g *Group) Create(db *pg.DB) (*Group, error) {
 	}
 
 	if len(minorErrors) > 0 {
-		return g, &errorGroupSuperRelation{strings.Join(minorErrors, " | ")}
+		return g, &ErrorGroupSuperRelation{strings.Join(minorErrors, " | ")}
 	}
 
 	return g, nil
@@ -124,7 +127,7 @@ func (g *Group) GetByName(db *pg.DB, name string) (*Group, error) {
 
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return &group, &errorGroupNotFound{err.Error()}
+			return &group, &ErrorGroupNotFound{err.Error()}
 		}
 		return &group, err
 	}

@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"strings"
@@ -33,27 +33,30 @@ type Super struct {
 	RelativesCount int      `json:"relatives_count,string" sql:"-"`
 }
 
-type errorSuperAlreadyExists struct {
+// ErrorSuperAlreadyExists Super Already Exists - extends error
+type ErrorSuperAlreadyExists struct {
 	s string
 }
 
-func (e *errorSuperAlreadyExists) Error() string {
+func (e *ErrorSuperAlreadyExists) Error() string {
 	return e.s
 }
 
-type errorSuperNotFound struct {
+// ErrorSuperNotFound Super Not Found - extends error
+type ErrorSuperNotFound struct {
 	s string
 }
 
-func (e *errorSuperNotFound) Error() string {
+func (e *ErrorSuperNotFound) Error() string {
 	return e.s
 }
 
-type errorSuperInvalidFields struct {
+// ErrorSuperInvalidFields Super Invalid Fields - extends error
+type ErrorSuperInvalidFields struct {
 	s string
 }
 
-func (e *errorSuperInvalidFields) Error() string {
+func (e *ErrorSuperInvalidFields) Error() string {
 	return e.s
 }
 
@@ -66,7 +69,7 @@ func (s *Super) validate() (*Super, error) {
 		"VILAN":
 		s.Type = strings.ToUpper(s.Type)
 	default:
-		return s, &errorSuperInvalidFields{"Type should be one of [\"HERO\", \"VILAN\"]"}
+		return s, &ErrorSuperInvalidFields{"Type should be one of [\"HERO\", \"VILAN\"]"}
 	}
 
 	return s, nil
@@ -82,7 +85,7 @@ func (s *Super) Create(db *pg.DB) (*Super, error) {
 		pgErr, ok := err.(pg.Error)
 		if ok {
 			if pgErr.IntegrityViolation() {
-				return s, &errorSuperAlreadyExists{err.Error()}
+				return s, &ErrorSuperAlreadyExists{err.Error()}
 			}
 		}
 		panic(err)
@@ -91,7 +94,8 @@ func (s *Super) Create(db *pg.DB) (*Super, error) {
 	return s, nil
 }
 
-func (s *Super) getByNameOrUUID(db *pg.DB, idStr string) (*Super, error) {
+// GetByNameOrUUID query DB for Super with (name OR uuid) == idStr
+func (s *Super) GetByNameOrUUID(db *pg.DB, idStr string) (*Super, error) {
 	super := Super{}
 
 	err := db.Model(&super).TableExpr("supers AS s").
@@ -107,7 +111,7 @@ func (s *Super) getByNameOrUUID(db *pg.DB, idStr string) (*Super, error) {
 
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return &super, &errorSuperNotFound{err.Error()}
+			return &super, &ErrorSuperNotFound{err.Error()}
 		}
 		return &super, err
 	}
@@ -192,12 +196,12 @@ func (s *Super) DeleteByNameOrUUID(db *pg.DB, idStr string) error {
 
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return &errorSuperNotFound{err.Error()}
+			return &ErrorSuperNotFound{err.Error()}
 		}
 		return err
 	}
 	if res.RowsAffected() < 1 {
-		return &errorSuperNotFound{"Can't delete Super - Not Found"}
+		return &ErrorSuperNotFound{"Can't delete Super - Not Found"}
 	}
 
 	return nil

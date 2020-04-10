@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"log"
@@ -9,7 +9,9 @@ import (
 
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
-	_ "github.com/tcarreira/superhero/docs"
+	_ "github.com/tcarreira/superhero/docs" // swagger import side effects
+
+	"github.com/tcarreira/superhero/models"
 )
 
 // @title Superhero API
@@ -55,9 +57,9 @@ type SuperAPI struct {
 	Router *gin.Engine
 }
 
-func (api *SuperAPI) handleSuperCreate(c *gin.Context, super *Super) {
+func (api *SuperAPI) handleSuperCreate(c *gin.Context, super *models.Super) {
 	if _, err := super.Create(api.DB); err != nil {
-		if _, ok := err.(*errorSuperAlreadyExists); ok {
+		if _, ok := err.(*models.ErrorSuperAlreadyExists); ok {
 			c.JSON(http.StatusConflict, errorResponseJSON{
 				"Super already exists - update it instead",
 				err.Error(),
@@ -70,8 +72,8 @@ func (api *SuperAPI) handleSuperCreate(c *gin.Context, super *Super) {
 	}
 }
 
-func (api *SuperAPI) handleSuperBindingJSON(c *gin.Context) (*Super, bool) {
-	super := Super{}
+func (api *SuperAPI) handleSuperBindingJSON(c *gin.Context) (*models.Super, bool) {
+	super := models.Super{}
 
 	if err := c.ShouldBindJSON(&super); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponseJSON{
@@ -94,7 +96,7 @@ type exampleSuperHeroVilanJSON struct {
 // @Accept  json
 // @Produce  json
 // @Param super body exampleSuperHeroVilanJSON true "super hero name"
-// @Success 201 {object} Super "Super was created"
+// @Success 201 {object} models.Super "Super was created"
 // @Failure 409 {object} errorResponseJSON "Super already exists"
 // @Router /super-hero [post]
 func (api *SuperAPI) SuperHeroPOSTHandler(c *gin.Context) {
@@ -115,7 +117,7 @@ func (api *SuperAPI) SuperHeroPOSTHandler(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param super body exampleSuperHeroVilanJSON true "super vilan name"
-// @Success 201 {object} Super "Super was created"
+// @Success 201 {object} models.Super "Super was created"
 // @Failure 409 {object} errorResponseJSON "Super already exists"
 // @Router /super-vilan [post]
 func (api *SuperAPI) SuperVilanPOSTHandler(c *gin.Context) {
@@ -141,7 +143,7 @@ type exampleSuperJSON struct {
 // @Accept  json
 // @Produce  json
 // @Param super body exampleSuperJSON true "super hero (mandatory: name and type)"
-// @Success 201 {object} Super "Super was created"
+// @Success 201 {object} models.Super "Super was created"
 // @Failure 409 {object} errorResponseJSON "Super already exists"
 // @Router /supers [post]
 func (api *SuperAPI) SupersPOSTHandler(c *gin.Context) {
@@ -162,11 +164,11 @@ func (api *SuperAPI) SupersPOSTHandler(c *gin.Context) {
 // @Param name query string false "Super(hero/vilan) Name (case-sensitive)"
 // @Param uuid query string false "Super(hero/vilan) UUID (case-insensitive)"
 // @Param type query string false "Super(hero/vilan) Type (HERO / VILAN) (case-insensitive)"
-// @Success 200 {array} Super "List of Supers"
+// @Success 200 {array} models.Super "List of Supers"
 // @Failure 400 {object} errorResponseJSON "Error parsing payload"
 // @Router /supers [get]
 func (api *SuperAPI) SupersGETFiltersHandler(c *gin.Context) {
-	sFilter := Super{}
+	sFilter := models.Super{}
 
 	if err := c.ShouldBind(&sFilter); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponseJSON{
@@ -185,17 +187,17 @@ func (api *SuperAPI) SupersGETFiltersHandler(c *gin.Context) {
 // @Description Get a Super by name or uuid
 // @Produce json
 // @Param id path string true "Super's Name or UUID"
-// @Success 200 {object} Super "Super"
+// @Success 200 {object} models.Super "Super"
 // @Failure 404 {object} errorResponseJSON "Super Not Found"
 // @Failure 500 {object} errorResponseJSON "Unexpected Error"
 // @Router /supers/{id} [get]
 func (api *SuperAPI) SupersGETByIDHandler(c *gin.Context) {
-	var super *Super
+	var super *models.Super
 	var err error
 
-	super, err = super.getByNameOrUUID(api.DB, c.Param("id"))
+	super, err = super.GetByNameOrUUID(api.DB, c.Param("id"))
 	if err != nil {
-		if _, ok := err.(*errorSuperNotFound); ok {
+		if _, ok := err.(*models.ErrorSuperNotFound); ok {
 			c.JSON(http.StatusNotFound, errorResponseJSON{
 				"No Super was found",
 				err.Error(),
@@ -225,16 +227,16 @@ func (api *SuperAPI) SupersPUTHandler(c *gin.Context) {
 // @Description Delete a by name or uuid
 // @Produce json
 // @Param id path string true "Super's Name or UUID"
-// @Success 204
+// @Success 204 "Successfully deleted"
 // @Failure 404 {object} errorResponseJSON "Super Not Found"
 // @Failure 500 {object} errorResponseJSON "Unexpected Error"
 // @Router /supers/{id} [delete]
 func (api *SuperAPI) SupersDeleteHandler(c *gin.Context) {
-	super := new(Super)
+	super := new(models.Super)
 	err := super.DeleteByNameOrUUID(api.DB, c.Param("id"))
 
 	if err != nil {
-		if _, ok := err.(*errorSuperNotFound); ok {
+		if _, ok := err.(*models.ErrorSuperNotFound); ok {
 			// nothing was deleted - return 404
 			c.JSON(http.StatusNotFound, errorResponseJSON{
 				"Super Not Found",
@@ -279,7 +281,7 @@ type GroupAPI struct {
 
 // GroupsPOSTHandler Create Group
 func (api *GroupAPI) GroupsPOSTHandler(c *gin.Context) {
-	group := Group{}
+	group := models.Group{}
 
 	if err := c.ShouldBindJSON(&group); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponseJSON{
@@ -290,12 +292,12 @@ func (api *GroupAPI) GroupsPOSTHandler(c *gin.Context) {
 	}
 
 	if group, err := group.Create(api.DB); err != nil {
-		if _, ok := err.(*errorGroupAlreadyExists); ok {
+		if _, ok := err.(*models.ErrorGroupAlreadyExists); ok {
 			c.JSON(http.StatusConflict, errorResponseJSON{
 				"Group already exists - update it instead",
 				err.Error(),
 			})
-		} else if _, ok := err.(*errorGroupSuperRelation); ok {
+		} else if _, ok := err.(*models.ErrorGroupSuperRelation); ok {
 			log.Println("Found some non-fatal errors. Will log and ignore:", err.Error())
 		} else {
 			panic(err)
@@ -308,12 +310,12 @@ func (api *GroupAPI) GroupsPOSTHandler(c *gin.Context) {
 
 // GroupsGETHandler Get a Group
 func (api *GroupAPI) GroupsGETHandler(c *gin.Context) {
-	var group *Group
+	var group *models.Group
 	var err error
 
 	group, err = group.GetByName(api.DB, c.Param("name"))
 	if err != nil {
-		if _, ok := err.(*errorGroupNotFound); ok {
+		if _, ok := err.(*models.ErrorGroupNotFound); ok {
 			c.JSON(http.StatusNotFound, errorResponseJSON{
 				"Group not found", err.Error(),
 			})
@@ -348,19 +350,19 @@ func (api *GroupAPI) GroupsDeleteHandler(c *gin.Context) {
 //
 //
 
-func setRoutes(s *Server) *gin.Engine {
+func setRoutes(r *gin.Engine, db *pg.DB) *gin.Engine {
 
-	s.Router.GET("/", func(c *gin.Context) {
+	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"data": "hello world"})
 	})
 
-	v1 := s.Router.Group("/api/v1")
+	v1 := r.Group("/api/v1")
 	{
 		// Supers
 		{
 			api := SuperAPI{
-				DB:     s.DB,
-				Router: s.Router,
+				DB:     db,
+				Router: r,
 			}
 
 			v1.POST("/super-hero", api.SuperHeroPOSTHandler)
@@ -379,8 +381,8 @@ func setRoutes(s *Server) *gin.Engine {
 		groups := v1.Group("/groups")
 		{
 			api := GroupAPI{
-				DB:     s.DB,
-				Router: s.Router,
+				DB:     db,
+				Router: r,
 			}
 
 			groups.POST("/groups", api.GroupsPOSTHandler)
@@ -390,7 +392,7 @@ func setRoutes(s *Server) *gin.Engine {
 		}
 	}
 
-	return s.Router
+	return r
 }
 
 //     _____
@@ -402,31 +404,30 @@ func setRoutes(s *Server) *gin.Engine {
 //
 //
 
-// SetupRouter setup a default gin.Engine and setup Routes
-func (s *Server) SetupRouter() *Server {
-	s.Router = gin.Default()
+// SetupRouter setup a default gin.Engine and setup Routes but do not run
+func SetupRouter(db *pg.DB) *gin.Engine {
+	r := gin.Default()
+	r = setRoutes(r, db)
 
-	s.Router = setRoutes(s)
-
-	return s
+	return r
 }
 
 // RunHTTPServer setup routes and start http server
-func (s *Server) RunHTTPServer() {
-	s.SetupRouter()
-	s.Router.Run()
+func RunHTTPServer(db *pg.DB) {
+	r := SetupRouter(db)
+	r.Run()
 }
 
 // RunHTTPServerWithSwagger setup routes (with /swagger) and start http server
-func (s *Server) RunHTTPServerWithSwagger() {
-	s.SetupRouter()
+func RunHTTPServerWithSwagger(db *pg.DB) {
+	r := SetupRouter(db)
 	// s.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	s.Router.GET("/swagger/*any", ginSwagger.CustomWrapHandler(
+	r.GET("/swagger/*any", ginSwagger.CustomWrapHandler(
 		&ginSwagger.Config{
 			URL: "doc.json",
 		},
 		swaggerFiles.Handler,
 	))
 
-	s.Router.Run()
+	r.Run()
 }

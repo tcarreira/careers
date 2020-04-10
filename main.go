@@ -1,21 +1,13 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/go-pg/pg"
+	"github.com/tcarreira/superhero/commandline"
+	db "github.com/tcarreira/superhero/models"
 )
 
-// Server stores both Database and HTTP Server connectors
-type Server struct {
-	DB     *pg.DB
-	Router *gin.Engine
-}
-
 func main() {
-	s := Server{}
+	db := db.SetupDatabase()
+	defer db.Close()
 
-	s.setupDatabase()
-	defer s.DB.Close()
-
-	s.ParseCommandLine()
+	commandline.Parse(db)
 }

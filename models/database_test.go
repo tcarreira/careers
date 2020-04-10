@@ -1,6 +1,6 @@
 // +build sql
 
-package main
+package models
 
 import (
 	"testing"
@@ -10,8 +10,7 @@ import (
 )
 
 func TestDatabaseSimpleSelect(t *testing.T) {
-	s := Server{}
-	s.setupDatabase()
+	d := db.SetupDatabase()
 
 	var num int
 
@@ -24,8 +23,7 @@ func TestDatabaseSimpleSelect(t *testing.T) {
 }
 
 func TestDBCreateSchema(t *testing.T) {
-	s := new(Server)
-	s.setupDatabase()
+	d := db.SetupDatabase()
 
 	s.dbDropSchema()
 	s.DBCreateSchema()
