@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-pg/pg"
-	"github.com/go-pg/pg/orm"
+	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v9/orm"
 )
 
 func getEnv(key, fallback string) string {

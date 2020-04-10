@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/v9"
 	db "github.com/tcarreira/superhero/models"
 	"github.com/tcarreira/superhero/server"
 )
