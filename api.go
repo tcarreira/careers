@@ -143,8 +143,17 @@ func (api *SuperAPI) SupersGETFiltersHandler(c *gin.Context) {
 	}
 }
 
-// supersGETByIDHandler handles GET Requests at /supers/:id (name or uuid)
-func (api *SuperAPI) supersGETByIDHandler(c *gin.Context) {
+// SupersGETByIDHandler a Super @ /supers/:id...
+// ---
+// @Summary Get Super
+// @Description Get a Super by name or uuid
+// @Produce json
+// @Param id path string true "Super's Name or UUID"
+// @Success 200 {object} Super "Super"
+// @Failure 404 {object} errorResponseJSON "Super Not Found"
+// @Failure 500 {object} errorResponseJSON "Unexpected Error"
+// @Router /supers/{id} [get]
+func (api *SuperAPI) SupersGETByIDHandler(c *gin.Context) {
 	var super *Super
 	var err error
 
@@ -274,7 +283,7 @@ func setRoutes(s *Server) *gin.Engine {
 
 		v1.POST("/supers", api.SupersPOSTHandler)
 		v1.GET("/supers", api.SupersGETFiltersHandler)
-		v1.GET("/supers/:id", api.supersGETByIDHandler)
+		v1.GET("/supers/:id", api.SupersGETByIDHandler)
 		v1.PUT("/supers/:id", api.supersPUTHandler)
 		v1.DELETE("/supers/:id", api.supersDeleteHandler)
 
