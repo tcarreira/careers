@@ -24,6 +24,20 @@ import (
 
 // @BasePath /api/v1
 
+type errorResponseJSON struct {
+	Message string `json:"message"`
+	Error   string `json:"error,omitempty"`
+}
+
+//     _____
+//    / ____|
+//   | (___  _   _ _ __   ___ _ __ ___
+//    \___ \| | | | '_ \ / _ \ '__/ __|
+//    ____) | |_| | |_) |  __/ |  \__ \
+//   |_____/ \__,_| .__/ \___|_|  |___/
+//                | |
+//                |_|
+
 // SuperHandler interface for REST API for Super
 type SuperHandler interface {
 	SuperHeroPOSTHandler(c *gin.Context)
@@ -39,11 +53,6 @@ type SuperHandler interface {
 type SuperAPI struct {
 	DB     *pg.DB
 	Router *gin.Engine
-}
-
-type errorResponseJSON struct {
-	Message string `json:"message"`
-	Error   string `json:"error,omitempty"`
 }
 
 func (api *SuperAPI) handleSuperCreate(c *gin.Context, super *Super) {
@@ -202,7 +211,8 @@ func (api *SuperAPI) SupersGETByIDHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, super)
 }
 
-func (api *SuperAPI) supersPUTHandler(c *gin.Context) {
+// SupersPUTHandler Update Super
+func (api *SuperAPI) SupersPUTHandler(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, errorResponseJSON{
 		"Not Implemented",
 		"Updating Super is out of scope for now",
@@ -218,7 +228,7 @@ func (api *SuperAPI) supersPUTHandler(c *gin.Context) {
 // @Success 204
 // @Failure 404 {object} errorResponseJSON "Super Not Found"
 // @Failure 500 {object} errorResponseJSON "Unexpected Error"
-// @Router /supers/{id} [get]
+// @Router /supers/{id} [delete]
 func (api *SuperAPI) SupersDeleteHandler(c *gin.Context) {
 	super := new(Super)
 	err := super.DeleteByNameOrUUID(api.DB, c.Param("id"))
@@ -242,7 +252,33 @@ func (api *SuperAPI) SupersDeleteHandler(c *gin.Context) {
 	}
 }
 
-func (api *SuperAPI) groupsPOSTHandler(c *gin.Context) {
+//////////////////////////////////////////////////////////////
+//     _____
+//    / ____|
+//   | |  __ _ __ ___  _   _ _ __  ___
+//   | | |_ | '__/ _ \| | | | '_ \/ __|
+//   | |__| | | | (_) | |_| | |_) \__ \
+//    \_____|_|  \___/ \__,_| .__/|___/
+//                          | |
+//                          |_|
+//////////////////////////////////////////////////////////////
+
+// GroupHandler interface for REST API for Groups
+type GroupHandler interface {
+	GroupsPOSTHandler(c *gin.Context)
+	GroupsGETHandler(c *gin.Context)
+	GroupsPUTHandler(c *gin.Context)
+	GroupsDeleteHandler(c *gin.Context)
+}
+
+// GroupAPI implements GroupHandler interface
+type GroupAPI struct {
+	DB     *pg.DB
+	Router *gin.Engine
+}
+
+// GroupsPOSTHandler Create Group
+func (api *GroupAPI) GroupsPOSTHandler(c *gin.Context) {
 	group := Group{}
 
 	if err := c.ShouldBindJSON(&group); err != nil {
@@ -270,7 +306,8 @@ func (api *SuperAPI) groupsPOSTHandler(c *gin.Context) {
 
 }
 
-func (api *SuperAPI) groupsGETHandler(c *gin.Context) {
+// GroupsGETHandler Get a Group
+func (api *GroupAPI) GroupsGETHandler(c *gin.Context) {
 	var group *Group
 	var err error
 
@@ -288,19 +325,28 @@ func (api *SuperAPI) groupsGETHandler(c *gin.Context) {
 	}
 }
 
-func (api *SuperAPI) groupsPUTHandler(c *gin.Context) {
+// GroupsPUTHandler Update a Group
+func (api *GroupAPI) GroupsPUTHandler(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, errorResponseJSON{
 		"Not implemented", "out of the scope for this exercise",
 	})
 }
 
-func (api *SuperAPI) groupsDeleteHandler(c *gin.Context) {
+// GroupsDeleteHandler Delete a Group
+func (api *GroupAPI) GroupsDeleteHandler(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, errorResponseJSON{
 		"Not implemented", "out of the scope for this exercise",
 	})
 }
 
-//  Routes
+//    _____             _
+//   |  __ \           | |
+//   | |__) |___  _   _| |_ ___  ___
+//   |  _  // _ \| | | | __/ _ \/ __|
+//   | | \ \ (_) | |_| | ||  __/\__ \
+//   |_|  \_\___/ \__,_|\__\___||___/
+//
+//
 
 func setRoutes(s *Server) *gin.Engine {
 
@@ -310,32 +356,54 @@ func setRoutes(s *Server) *gin.Engine {
 
 	v1 := s.Router.Group("/api/v1")
 	{
-		api := SuperAPI{
-			DB:     s.DB,
-			Router: s.Router,
+		// Supers
+		{
+			api := SuperAPI{
+				DB:     s.DB,
+				Router: s.Router,
+			}
+
+			v1.POST("/super-hero", api.SuperHeroPOSTHandler)
+			v1.POST("/super-vilan", api.SuperVilanPOSTHandler)
+
+			supers := v1.Group("/supers")
+			{
+				supers.POST("", api.SupersPOSTHandler)
+				supers.GET("", api.SupersGETFiltersHandler)
+				supers.GET("/:id", api.SupersGETByIDHandler)
+				supers.PUT("/:id", api.SupersPUTHandler)
+				supers.DELETE("/:id", api.SupersDeleteHandler)
+			}
 		}
 
-		v1.POST("/super-hero", api.SuperHeroPOSTHandler)
-		v1.POST("/super-vilan", api.SuperVilanPOSTHandler)
+		groups := v1.Group("/groups")
+		{
+			api := GroupAPI{
+				DB:     s.DB,
+				Router: s.Router,
+			}
 
-		v1.POST("/supers", api.SupersPOSTHandler)
-		v1.GET("/supers", api.SupersGETFiltersHandler)
-		v1.GET("/supers/:id", api.SupersGETByIDHandler)
-		v1.PUT("/supers/:id", api.SupersPUTHandler)
-		v1.DELETE("/supers/:id", api.SupersDeleteHandler)
-
-		v1.POST("/groups", api.groupsPOSTHandler)
-		v1.GET("/groups/:name", api.groupsGETHandler)
-		v1.PUT("/groups/:name", api.groupsPUTHandler)
-		v1.DELETE("/groups/:name", api.groupsDeleteHandler)
+			groups.POST("/groups", api.GroupsPOSTHandler)
+			groups.GET("/groups/:name", api.GroupsGETHandler)
+			groups.PUT("/groups/:name", api.GroupsPUTHandler)
+			groups.DELETE("/groups/:name", api.GroupsDeleteHandler)
+		}
 	}
 
 	return s.Router
 }
 
-// run server
+//     _____
+//    / ____|
+//   | (___   ___ _ ____   _____ _ __
+//    \___ \ / _ \ '__\ \ / / _ \ '__|
+//    ____) |  __/ |   \ V /  __/ |
+//   |_____/ \___|_|    \_/ \___|_|
+//
+//
 
-func (s *Server) setupRouter() *Server {
+// SetupRouter setup a default gin.Engine and setup Routes
+func (s *Server) SetupRouter() *Server {
 	s.Router = gin.Default()
 
 	s.Router = setRoutes(s)
@@ -343,13 +411,15 @@ func (s *Server) setupRouter() *Server {
 	return s
 }
 
-func (s *Server) runHTTPServer() {
-	s.setupRouter()
+// RunHTTPServer setup routes and start http server
+func (s *Server) RunHTTPServer() {
+	s.SetupRouter()
 	s.Router.Run()
 }
 
-func (s *Server) runHTTPServerWithSwagger() {
-	s.setupRouter()
+// RunHTTPServerWithSwagger setup routes (with /swagger) and start http server
+func (s *Server) RunHTTPServerWithSwagger() {
+	s.SetupRouter()
 	// s.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	s.Router.GET("/swagger/*any", ginSwagger.CustomWrapHandler(
 		&ginSwagger.Config{

@@ -71,11 +71,11 @@ func parseCommandLine(comm CommandLiner, s *Server) {
 
 		case "serve":
 			if comm.lenArgs() < 3 {
-				s.runHTTPServer()
+				s.RunHTTPServer()
 			} else {
 				switch comm.getArg(2) {
 				case "swagger":
-					s.runHTTPServerWithSwagger()
+					s.RunHTTPServerWithSwagger()
 				default:
 					comm.serveUsagePrint(logger)
 					comm.exit(1)
