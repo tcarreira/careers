@@ -98,7 +98,7 @@ type exampleSuperHeroVilanJSON struct {
 	Name string `json:"name" example:"name1"`
 }
 
-// CreateSuper godoc
+// supersPOSTHandler godoc
 // ---
 // @Summary Create new Super (hero/vilan)
 // @Description Create new Super
@@ -106,6 +106,7 @@ type exampleSuperHeroVilanJSON struct {
 // @Produce  json
 // @Param super body exampleSuperHeroVilanJSON true "super hero name"
 // @Success 201 {object} Super "Super was created"
+// @Failure 409 {object} errorResponseJSON "Super already exists"
 // @Router /super-hero [post]
 func (api *SuperAPI) supersPOSTHandler(c *gin.Context) {
 
