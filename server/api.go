@@ -65,7 +65,10 @@ func (api *SuperAPI) handleSuperCreate(c *gin.Context, super *models.Super) {
 				err.Error(),
 			})
 		} else {
-			panic(err)
+			c.JSON(http.StatusInternalServerError, errorResponseJSON{
+				"Unexpected error",
+				err.Error(),
+			})
 		}
 	} else {
 		c.JSON(http.StatusCreated, super)
@@ -98,6 +101,7 @@ type exampleSuperHeroVilanJSON struct {
 // @Param super body exampleSuperHeroVilanJSON true "super hero name"
 // @Success 201 {object} models.Super "Super was created"
 // @Failure 409 {object} errorResponseJSON "Super already exists"
+// @Failure 500 {object} errorResponseJSON "Unexpected error"
 // @Router /super-hero [post]
 func (api *SuperAPI) SuperHeroPOSTHandler(c *gin.Context) {
 
