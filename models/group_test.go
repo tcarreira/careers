@@ -54,8 +54,8 @@ func TestGroup_Create(t *testing.T) {
 	d := SetupEmptyTestDatabase()
 
 	supers := []Super{
-		Super{Type: "HERO", Name: "t1"},
-		Super{Type: "HERO", Name: "t2"},
+		{Type: "HERO", Name: "t1"},
+		{Type: "HERO", Name: "t2"},
 	}
 	for i := range supers {
 		supers[i].Create(d)
@@ -86,23 +86,23 @@ func TestGroup_GetByName(t *testing.T) {
 	d := SetupEmptyTestDatabase()
 
 	supers := []Super{
-		Super{Type: "HERO", Name: "t1"},
-		Super{Type: "HERO", Name: "t2"},
+		{Type: "HERO", Name: "t1"},
+		{Type: "HERO", Name: "t2"},
 	}
 	for i := range supers {
 		supers[i].Create(d)
 	}
 
 	groups := []Group{
-		Group{
+		{
 			Name:   "group1",
 			Supers: supers,
 		},
-		Group{
+		{
 			Name:   "group2",
 			Supers: []Super{supers[0]},
 		},
-		Group{
+		{
 			Name:   "group3",
 			Supers: []Super{},
 		},
@@ -124,7 +124,7 @@ func TestGroup_GetByName(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, "group2", got.Name)
-		assertSupers(t, []Super{Super{Type: "HERO", Name: "t1"}}, got.Supers)
+		assertSupers(t, []Super{{Type: "HERO", Name: "t1"}}, got.Supers)
 	})
 
 	t.Run("TestGroup_GetByName - test3 - with zero Super", func(t *testing.T) {
@@ -145,24 +145,24 @@ func TestGroup_GetAllBySuper(t *testing.T) {
 	d := SetupEmptyTestDatabase()
 
 	supers := []Super{
-		Super{Type: "HERO", Name: "s1"},
-		Super{Type: "HERO", Name: "s2"},
-		Super{Type: "HERO", Name: "s3"},
+		{Type: "HERO", Name: "s1"},
+		{Type: "HERO", Name: "s2"},
+		{Type: "HERO", Name: "s3"},
 	}
 	for i := range supers {
 		supers[i].Create(d)
 	}
 
 	groups := []Group{
-		Group{
+		{
 			Name:   "group1",
 			Supers: supers[0:2],
 		},
-		Group{
+		{
 			Name:   "group2",
 			Supers: []Super{supers[0]},
 		},
-		Group{
+		{
 			Name:   "group3",
 			Supers: []Super{},
 		},
