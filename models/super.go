@@ -19,18 +19,19 @@ type SuperInterface interface {
 // Super represents either a SuperHero or a SuperVilan
 // swagger:model Super
 type Super struct {
-	ID             uint64   `json:"-" sql:",pk"`
-	UUID           string   `json:"uuid" example:"47c0df01-a47d-497f-808d-181021f01c76" form:"uuid" sql:",notnull,type:uuid,default:gen_random_uuid()"`
+	tableName      struct{} `json:"-" pg:"superhero_supers,alias:s"` // json tag for swaggo bug
+	ID             uint64   `json:"-" pg:",pk"`
+	UUID           string   `json:"uuid" example:"47c0df01-a47d-497f-808d-181021f01c76" form:"uuid" pg:",notnull,type:uuid,default:gen_random_uuid()"`
 	Type           string   `json:"type" example:"HERO" enums:"HERO,VILAN" form:"type"`
-	Name           string   `json:"name" form:"name" example:"SuperHero1" sql:",unique,notnull"`
+	Name           string   `json:"name" form:"name" example:"SuperHero1" pg:",unique,notnull"`
 	FullName       string   `json:"fullname" example:"SuperHero1's Full Name"`
 	Intelligence   int64    `json:"intelligence,string" example:"90"`
 	Power          int64    `json:"power,string" example:"80"`
 	Occupation     string   `json:"occupation" example:"Programmer"`
 	ImageURL       string   `json:"image_url" example:"https://http.cat/200"`
-	Groups         []Group  `json:"-" pg:"many2many:group_supers,joinFK:group_id"`
-	GroupsList     []string `json:"groups" example:"group1,group2" sql:"-"`
-	RelativesCount int      `json:"relatives_count,string" sql:"-"`
+	Groups         []Group  `json:"-" pg:"many2many:superhero_group_supers,joinFK:group_id"`
+	GroupsList     []string `json:"groups,nilasempty" example:"group1,group2" pg:"-"`
+	RelativesCount int      `json:"relatives_count,string" pg:"-"`
 }
 
 // ErrorSuperAlreadyExists Super Already Exists - extends error
@@ -98,12 +99,12 @@ func (s *Super) Create(db *pg.DB) (*Super, error) {
 func (s *Super) GetByNameOrUUID(db *pg.DB, idStr string) (*Super, error) {
 	super := Super{}
 
-	err := db.Model(&super).TableExpr("supers AS s").
+	err := db.Model(&super).
 		Relation("Groups").
 		Column("s.*").ColumnExpr("count(distinct relatives.id) AS relatives_count").
-		Join("LEFT JOIN group_supers AS s2g ON s.id = s2g.super_id").
-		Join("LEFT JOIN group_supers AS g2s ON s2g.group_id = g2s.group_id").
-		Join("LEFT JOIN supers AS relatives ON g2s.super_id = relatives.id AND g2s.super_id != s.id").
+		Join("LEFT JOIN superhero_group_supers AS s2g ON s.id = s2g.super_id").
+		Join("LEFT JOIN superhero_group_supers AS g2s ON s2g.group_id = g2s.group_id").
+		Join("LEFT JOIN superhero_supers AS relatives ON g2s.super_id = relatives.id AND g2s.super_id != s.id").
 		Where("s.name = ?", idStr).
 		WhereOr("upper(s.uuid::text) = ?", strings.ToUpper(idStr)).
 		Group("s.id").
@@ -155,12 +156,12 @@ func (s *Super) ReadAll(db *pg.DB) []Super {
 	// supersResult=[] instead of supersResult=nil
 	supersResult := make([]Super, 0)
 
-	err := db.Model(&supersResult).TableExpr("supers AS s").
+	err := db.Model(&supersResult).
 		Relation("Groups").
 		Column("s.*").ColumnExpr("count(distinct relatives.id) AS relatives_count").
-		Join("LEFT JOIN group_supers AS s2g ON s.id = s2g.super_id").
-		Join("LEFT JOIN group_supers AS g2s ON s2g.group_id = g2s.group_id").
-		Join("LEFT JOIN supers AS relatives ON g2s.super_id = relatives.id AND g2s.super_id != s.id").
+		Join("LEFT JOIN superhero_group_supers AS s2g ON s.id = s2g.super_id").
+		Join("LEFT JOIN superhero_group_supers AS g2s ON s2g.group_id = g2s.group_id").
+		Join("LEFT JOIN superhero_supers AS relatives ON g2s.super_id = relatives.id AND g2s.super_id != s.id").
 		Apply(filter).
 		Group("s.id").
 		Select()

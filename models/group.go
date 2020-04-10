@@ -9,11 +9,11 @@ import (
 
 // Group represents a group of supers
 type Group struct {
-	tableName  struct{} `pg:"alias:g"`
-	ID         uint64   `json:"-" sql:",pk"`
-	Name       string   `json:"name" sql:",unique,notnull"`
-	Supers     []Super  `json:"-" pg:"many2many:group_supers,joinFK:super_id"`
-	SupersList []string `json:"supers" sql:"-" `
+	tableName  struct{} `json:"-" pg:"superhero_groups,alias:g"` // json tag for swaggo bug
+	ID         uint64   `json:"-" pg:",pk"`
+	Name       string   `json:"name" example:"group1" pg:",unique,notnull"`
+	Supers     []Super  `json:"-" pg:"many2many:superhero_group_supers,joinFK:super_id"`
+	SupersList []string `json:"supers,nilasempty" example:"name1" pg:"-" `
 }
 
 // UnmarshalJSON will instantiate a Group from a JSON, where Supers is a []string of Super names
@@ -40,10 +40,10 @@ func (g *Group) UnmarshalJSON(data []byte) error {
 
 // GroupSuper represents many2many table Groups-Supers
 type GroupSuper struct {
-	tableName struct{} `pg:"alias:g2s"`
-	GroupID   uint64   `sql:"group_id,pk"`
+	tableName struct{} `pg:"superhero_group_supers,alias:g2s"`
+	GroupID   uint64   `pg:"group_id,pk"`
 	Group     *Group
-	SuperID   uint64 `sql:"super_id,pk"`
+	SuperID   uint64 `pg:"super_id,pk"`
 	Super     *Super
 }
 
@@ -151,8 +151,8 @@ func (g *Group) GetAllBySuper(db *pg.DB, super Super) ([]Group, error) {
 	var results []Group
 
 	err := db.Model(&results).
-		Join("JOIN group_supers AS gs").
-		JoinOn("gs.group_id = \"group\".id").
+		Join("JOIN superhero_group_supers AS gs").
+		JoinOn("gs.group_id = g.id").
 		JoinOn("gs.super_id = ?", super.ID).
 		Relation("Supers").
 		Select()
