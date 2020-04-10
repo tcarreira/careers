@@ -13,6 +13,12 @@ This is being made in the context of https://github.com/levpay/careers#desafio
 
 # Running
 
+## No setups option
+You may use a server which is already running, just open:   
+https://superhero-api.herokuapp.com/swagger/index.html 
+
+or start making requests to the API https://superhero-api.herokuapp.com/api/v1/
+
 
 ## Setup Environment (first time: create schema)
 
