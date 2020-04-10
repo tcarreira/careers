@@ -109,7 +109,7 @@ func (g *Group) Create(db *pg.DB) (*Group, error) {
 			}); err != nil {
 				minorErrors = append(minorErrors, err.Error())
 			} else {
-				// Really commited the transaction
+				// Really committed the transaction
 				g.SupersList = append(g.SupersList, s.Name)
 			}
 		}

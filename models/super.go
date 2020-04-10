@@ -173,7 +173,7 @@ func (s *Super) ReadAll(db *pg.DB) []Super {
 	}
 
 	for i := range supersResult {
-		supersResult[i].GroupsList = make([]string, 0) // make emtpy array instead of null
+		supersResult[i].GroupsList = make([]string, 0) // make empty array instead of null
 		// create the Group Names List as []string
 		for _, group := range supersResult[i].Groups {
 			supersResult[i].GroupsList = append(supersResult[i].GroupsList, group.Name)
