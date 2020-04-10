@@ -92,6 +92,8 @@ func (s *Super) Create(db *pg.DB) (*Super, error) {
 		panic(err)
 	}
 
+	s.GroupsList = make([]string, 0) // empty array instead of null
+
 	return s, nil
 }
 
@@ -118,6 +120,7 @@ func (s *Super) GetByNameOrUUID(db *pg.DB, idStr string) (*Super, error) {
 	}
 
 	// create the Group Names List as []string
+	super.GroupsList = make([]string, 0) // empty array instead of null
 	for _, group := range super.Groups {
 		super.GroupsList = append(super.GroupsList, group.Name)
 	}
@@ -170,7 +173,7 @@ func (s *Super) ReadAll(db *pg.DB) []Super {
 	}
 
 	for i := range supersResult {
-
+		supersResult[i].GroupsList = make([]string, 0) // make emtpy array instead of null
 		// create the Group Names List as []string
 		for _, group := range supersResult[i].Groups {
 			supersResult[i].GroupsList = append(supersResult[i].GroupsList, group.Name)

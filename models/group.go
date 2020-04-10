@@ -139,6 +139,7 @@ func (g *Group) GetByName(db *pg.DB, name string) (*Group, error) {
 	}
 
 	// create the Super Names List as []string
+	group.SupersList = make([]string, 0) // empty array instead of null
 	for _, super := range group.Supers {
 		group.SupersList = append(group.SupersList, super.Name)
 	}
