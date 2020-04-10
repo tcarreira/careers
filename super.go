@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"strings"
 
 	"github.com/go-pg/pg"
@@ -18,39 +17,20 @@ type SuperInterface interface {
 }
 
 // Super represents either a SuperHero or a SuperVilan
+// swagger:model Super
 type Super struct {
-	ID             uint64  `json:"-" sql:",pk"`
-	UUID           string  `json:"uuid" form:"uuid" sql:",notnull,type:uuid,default:gen_random_uuid()"`
-	Type           string  `json:"type" form:"type"`
-	Name           string  `json:"name" form:"name" sql:",unique,notnull"`
-	FullName       string  `json:"fullname"`
-	Intelligence   int64   `json:"intelligence,string"`
-	Power          int64   `json:"power,string"`
-	Occupation     string  `json:"occupation"`
-	ImageURL       string  `json:"image_url"`
-	Groups         []Group `json:"-" pg:"many2many:group_supers,joinFK:group_id"`
-	RelativesCount int     `json:"relatives_count,string" sql:"-"`
-}
-
-// MarshalJSON will render a Super JSON with a []string of group names instead of []Group
-func (s *Super) MarshalJSON() ([]byte, error) {
-	type Alias Super
-
-	// Adding a list of Group names
-	groupsNames := make([]string, 0)
-	for _, group := range s.Groups {
-		groupsNames = append(groupsNames, group.Name)
-	}
-
-	// Count of unique Groups
-
-	return json.Marshal(&struct {
-		*Alias
-		Groups []string `json:"groups"`
-	}{
-		Alias:  (*Alias)(s),
-		Groups: groupsNames,
-	})
+	ID             uint64   `json:"-" sql:",pk"`
+	UUID           string   `json:"uuid" example:"47c0df01-a47d-497f-808d-181021f01c76" form:"uuid" sql:",notnull,type:uuid,default:gen_random_uuid()"`
+	Type           string   `json:"type" example:"HERO" enums:"HERO,VILAN" form:"type"`
+	Name           string   `json:"name" form:"name" example:"SuperHero1" sql:",unique,notnull"`
+	FullName       string   `json:"fullname" example:"SuperHero1's Full Name"`
+	Intelligence   int64    `json:"intelligence,string" example:"90"`
+	Power          int64    `json:"power,string" example:"80"`
+	Occupation     string   `json:"occupation" example:"Programmer"`
+	ImageURL       string   `json:"image_url" example:"https://http.cat/200"`
+	Groups         []Group  `json:"-" pg:"many2many:group_supers,joinFK:group_id"`
+	GroupsList     []string `json:"groups" example:"group1,group2" sql:"-"`
+	RelativesCount int      `json:"relatives_count,string" sql:"-"`
 }
 
 type errorSuperAlreadyExists struct {
@@ -130,6 +110,11 @@ func (s *Super) getByNameOrUUID(db *pg.DB, idStr string) (*Super, error) {
 			return &super, &errorSuperNotFound{err.Error()}
 		}
 		return &super, err
+	}
+
+	// create the Group Names List as []string
+	for _, group := range super.Groups {
+		super.GroupsList = append(super.GroupsList, group.Name)
 	}
 
 	return &super, nil

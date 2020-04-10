@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -317,11 +318,12 @@ func TestSuper_GroupsRelatives(t *testing.T) {
 		// special attention to "relatives_count": and "groups":
 		super, _ := new(Super).getByNameOrUUID(s.DB, supers[0].Name)
 
-		superJSON, err := super.MarshalJSON()
+		var superJSON []byte
+		superJSON, err := json.Marshal(super)
 
 		assert.NoError(t, err)
 		assert.Equal(t,
-			string(`{"uuid":"41f0bc0e-89f7-4ea7-a4f5-9d08e5383b9c","type":"HERO","name":"main","fullname":"","intelligence":"0","power":"0","occupation":"","image_url":"","relatives_count":"3","groups":["g1","g3"]}`),
+			string(`{"uuid":"41f0bc0e-89f7-4ea7-a4f5-9d08e5383b9c","type":"HERO","name":"main","fullname":"","intelligence":"0","power":"0","occupation":"","image_url":"","groups":["g1","g3"],"relatives_count":"3"}`),
 			string(superJSON),
 		)
 
