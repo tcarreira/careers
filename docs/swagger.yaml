@@ -1,0 +1,80 @@
+basePath: /api/v1
+definitions:
+  main.Super:
+    properties:
+      fullname:
+        example: SuperHero1's Full Name
+        type: string
+      groups:
+        items:
+          type: string
+        type: array
+      image_url:
+        example: https://http.cat/200
+        type: string
+      intelligence:
+        example: 90
+        type: integer
+      name:
+        example: SuperHero1
+        type: string
+      occupation:
+        example: Programmer
+        type: string
+      power:
+        example: 80
+        type: integer
+      relatives_count:
+        type: integer
+      type:
+        enum:
+        - HERO
+        - VILAN
+        example: HERO
+        type: string
+      uuid:
+        example: 47c0df01-a47d-497f-808d-181021f01c76
+        type: string
+    type: object
+  main.exampleSuperHeroVilanJSON:
+    properties:
+      name:
+        example: name1
+        type: string
+      type:
+        example: HERO
+        type: string
+    type: object
+info:
+  contact:
+    name: Tiago Carreira
+    url: https://github.com/tcarreira/superhero
+  description: SuperHero API - Go (inspired by superheroapi.com) \n This is being
+    made in the context of https://github.com/levpay/careers#desafio
+  license:
+    name: MIT License
+    url: https://raw.githubusercontent.com/tcarreira/superhero/master/LICENSE
+  title: Superhero API
+  version: "1.0"
+paths:
+  /super-hero:
+    post:
+      consumes:
+      - application/json
+      description: Create new Super
+      parameters:
+      - description: super hero name
+        in: body
+        name: super
+        required: true
+        schema:
+          $ref: '#/definitions/main.exampleSuperHeroVilanJSON'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Super was created
+          schema:
+            $ref: '#/definitions/main.Super'
+      summary: Create new Super (hero/vilan)
+swagger: "2.0"

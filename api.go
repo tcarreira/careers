@@ -6,7 +6,23 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-pg/pg"
+
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
+	_ "github.com/tcarreira/superhero/docs"
 )
+
+// @title Superhero API
+// @version 1.0
+// @description SuperHero API - Go (inspired by superheroapi.com) \n This is being made in the context of https://github.com/levpay/careers#desafio
+
+// @contact.name Tiago Carreira
+// @contact.url https://github.com/tcarreira/superhero
+
+// @license.name MIT License
+// @license.url https://raw.githubusercontent.com/tcarreira/superhero/master/LICENSE
+
+// @BasePath /api/v1
 
 // SuperHandler interface for REST API for Super
 type SuperHandler interface {
@@ -77,6 +93,20 @@ func (api *SuperAPI) superVilanPOSTHandler(c *gin.Context) {
 	api.handleSuperCreate(c, super)
 }
 
+type exampleSuperHeroVilanJSON struct {
+	Type string `json:"type" example:"HERO"`
+	Name string `json:"name" example:"name1"`
+}
+
+// CreateSuper godoc
+// ---
+// @Summary Create new Super (hero/vilan)
+// @Description Create new Super
+// @Accept  json
+// @Produce  json
+// @Param super body exampleSuperHeroVilanJSON true "super hero name"
+// @Success 201 {object} Super "Super was created"
+// @Router /super-hero [post]
 func (api *SuperAPI) supersPOSTHandler(c *gin.Context) {
 
 	super, ok := api.handleSuperBindingJSON(c)
@@ -264,5 +294,18 @@ func (s *Server) setupRouter() *Server {
 
 func (s *Server) runHTTPServer() {
 	s.setupRouter()
+	s.Router.Run()
+}
+
+func (s *Server) runHTTPServerWithSwagger() {
+	s.setupRouter()
+	// s.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	s.Router.GET("/swagger/*any", ginSwagger.CustomWrapHandler(
+		&ginSwagger.Config{
+			URL: "doc.json",
+		},
+		swaggerFiles.Handler,
+	))
+
 	s.Router.Run()
 }

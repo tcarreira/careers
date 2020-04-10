@@ -20,6 +20,7 @@ type testCommandLine struct {
 }
 
 func (c *testCommandLine) usagePrint(logger *log.Logger)      { c.Called() }
+func (c *testCommandLine) serveUsagePrint(logger *log.Logger) { c.Called() }
 func (c *testCommandLine) adminUsagePrint(logger *log.Logger) { c.Called() }
 func (c *testCommandLine) exit(ret int)                       { c.Called(ret) }
 func (c *testCommandLine) getArg(idx int) string {

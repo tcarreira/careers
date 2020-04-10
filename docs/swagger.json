@@ -1,0 +1,115 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "SuperHero API - Go (inspired by superheroapi.com) \\n This is being made in the context of https://github.com/levpay/careers#desafio",
+        "title": "Superhero API",
+        "contact": {
+            "name": "Tiago Carreira",
+            "url": "https://github.com/tcarreira/superhero"
+        },
+        "license": {
+            "name": "MIT License",
+            "url": "https://raw.githubusercontent.com/tcarreira/superhero/master/LICENSE"
+        },
+        "version": "1.0"
+    },
+    "basePath": "/api/v1",
+    "paths": {
+        "/super-hero": {
+            "post": {
+                "description": "Create new Super",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create new Super (hero/vilan)",
+                "parameters": [
+                    {
+                        "description": "super hero name",
+                        "name": "super",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.exampleSuperHeroVilanJSON"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Super was created",
+                        "schema": {
+                            "$ref": "#/definitions/main.Super"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.Super": {
+            "type": "object",
+            "properties": {
+                "fullname": {
+                    "type": "string",
+                    "example": "SuperHero1's Full Name"
+                },
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "image_url": {
+                    "type": "string",
+                    "example": "https://http.cat/200"
+                },
+                "intelligence": {
+                    "type": "integer",
+                    "example": 90
+                },
+                "name": {
+                    "type": "string",
+                    "example": "SuperHero1"
+                },
+                "occupation": {
+                    "type": "string",
+                    "example": "Programmer"
+                },
+                "power": {
+                    "type": "integer",
+                    "example": 80
+                },
+                "relatives_count": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "HERO",
+                        "VILAN"
+                    ],
+                    "example": "HERO"
+                },
+                "uuid": {
+                    "type": "string",
+                    "example": "47c0df01-a47d-497f-808d-181021f01c76"
+                }
+            }
+        },
+        "main.exampleSuperHeroVilanJSON": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "name1"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "HERO"
+                }
+            }
+        }
+    }
+}

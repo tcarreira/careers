@@ -13,6 +13,7 @@ services:
       DB_PASS: superspassword
     command:
       - serve
+      - swagger
 
   db:
     image: postgres:12-alpine

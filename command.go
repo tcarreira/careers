@@ -9,6 +9,7 @@ import (
 // CommandLiner is an interface for methods used by ParseCommandLine
 type CommandLiner interface {
 	usagePrint(logger *log.Logger)
+	serveUsagePrint(logger *log.Logger)
 	adminUsagePrint(logger *log.Logger)
 	exit(ret int)
 	getArg(idx int) string
@@ -25,6 +26,14 @@ func (c CommandLine) usagePrint(logger *log.Logger) {
 	logger.Println("COMMAND:")
 	logger.Println("	admin: call admin actions")
 	logger.Println("	serve: start HTTP server")
+}
+
+// serveUsagePrint prints usage for admin sub-command
+func (c CommandLine) serveUsagePrint(logger *log.Logger) {
+	logger.Println("Usage:", filepath.Base(os.Args[0]), "serve", "COMMAND")
+	logger.Println("")
+	logger.Println("COMMAND:")
+	logger.Println("	swagger: run server with /swagger endpoint active")
 }
 
 // adminUsagePrint prints usage for admin sub-command
@@ -61,7 +70,17 @@ func parseCommandLine(comm CommandLiner, s *Server) {
 		switch comm.getArg(1) {
 
 		case "serve":
-			s.runHTTPServer()
+			if comm.lenArgs() < 3 {
+				s.runHTTPServer()
+			} else {
+				switch comm.getArg(2) {
+				case "swagger":
+					s.runHTTPServerWithSwagger()
+				default:
+					comm.serveUsagePrint(logger)
+					comm.exit(1)
+				}
+			}
 
 		case "admin":
 			if comm.lenArgs() < 3 {
