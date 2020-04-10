@@ -118,48 +118,43 @@ func (api *SuperAPI) supersPOSTHandler(c *gin.Context) {
 	api.handleSuperCreate(c, super)
 }
 
-// supersGETHandler handles GET Requests.
-// Valid requests:
-// 	GET /supers/name
-// 	GET /supers/uuid
-func (api *SuperAPI) supersGETHandler(c *gin.Context) {
+// supersGETByIDHandler handles GET Requests at /supers?type=hero...
+func (api *SuperAPI) supersGETFiltersHandler(c *gin.Context) {
+	sFilter := Super{}
 
-	if c.Param("id") != "" { // Searching for a specific user (by name or uuid)
-		var super *Super
-		var err error
-
-		super, err = super.getByNameOrUUID(api.DB, c.Param("id"))
-		if err != nil {
-			if _, ok := err.(*errorSuperNotFound); ok {
-				c.JSON(http.StatusNotFound, errorResponseJSON{
-					"No Super was found",
-					err.Error(),
-				})
-			} else {
-				c.JSON(http.StatusInternalServerError, errorResponseJSON{
-					"Internal Server Error",
-					err.Error(),
-				})
-			}
-		}
-
-		c.JSON(http.StatusOK, super)
-
+	if err := c.ShouldBind(&sFilter); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponseJSON{
+			"Could not process Payload (query parameters)",
+			err.Error(),
+		})
 	} else {
+		results := sFilter.ReadAll(api.DB)
 
-		sFilter := Super{}
+		c.JSON(http.StatusOK, results)
+	}
+}
 
-		if err := c.ShouldBind(&sFilter); err != nil {
-			c.JSON(http.StatusBadRequest, errorResponseJSON{
-				"Could not process Payload (query parameters)",
+// supersGETByIDHandler handles GET Requests at /supers/:id (name or uuid)
+func (api *SuperAPI) supersGETByIDHandler(c *gin.Context) {
+	var super *Super
+	var err error
+
+	super, err = super.getByNameOrUUID(api.DB, c.Param("id"))
+	if err != nil {
+		if _, ok := err.(*errorSuperNotFound); ok {
+			c.JSON(http.StatusNotFound, errorResponseJSON{
+				"No Super was found",
 				err.Error(),
 			})
 		} else {
-			results := sFilter.ReadAll(api.DB)
-
-			c.JSON(http.StatusOK, results)
+			c.JSON(http.StatusInternalServerError, errorResponseJSON{
+				"Internal Server Error",
+				err.Error(),
+			})
 		}
 	}
+
+	c.JSON(http.StatusOK, super)
 }
 
 func (api *SuperAPI) supersPUTHandler(c *gin.Context) {
@@ -269,8 +264,8 @@ func setRoutes(s *Server) *gin.Engine {
 		v1.POST("/super-vilan", api.superVilanPOSTHandler)
 
 		v1.POST("/supers", api.supersPOSTHandler)
-		v1.GET("/supers", api.supersGETHandler)
-		v1.GET("/supers/:id", api.supersGETHandler)
+		v1.GET("/supers", api.supersGETFiltersHandler)
+		v1.GET("/supers/:id", api.supersGETByIDHandler)
 		v1.PUT("/supers/:id", api.supersPUTHandler)
 		v1.DELETE("/supers/:id", api.supersDeleteHandler)
 
