@@ -98,7 +98,7 @@ type exampleSuperHeroVilanJSON struct {
 	Name string `json:"name" example:"name1"`
 }
 
-// supersPOSTHandler godoc
+// SupersPOSTHandler Create new Super
 // ---
 // @Summary Create new Super (hero/vilan)
 // @Description Create new Super
@@ -108,7 +108,7 @@ type exampleSuperHeroVilanJSON struct {
 // @Success 201 {object} Super "Super was created"
 // @Failure 409 {object} errorResponseJSON "Super already exists"
 // @Router /super-hero [post]
-func (api *SuperAPI) supersPOSTHandler(c *gin.Context) {
+func (api *SuperAPI) SupersPOSTHandler(c *gin.Context) {
 
 	super, ok := api.handleSuperBindingJSON(c)
 	if !ok {
@@ -118,8 +118,18 @@ func (api *SuperAPI) supersPOSTHandler(c *gin.Context) {
 	api.handleSuperCreate(c, super)
 }
 
-// supersGETByIDHandler handles GET Requests at /supers?type=hero...
-func (api *SuperAPI) supersGETFiltersHandler(c *gin.Context) {
+// SupersGETFiltersHandler get list of Super @ /supers?type=hero...
+// ---
+// @Summary Get list of Supers
+// @Description Get list of Supers by filtering by name, uuid or type
+// @Produce json
+// @Param name query string false "Super(hero/vilan) Name (case-sensitive)"
+// @Param uuid query string false "Super(hero/vilan) UUID (case-insensitive)"
+// @Param type query string false "Super(hero/vilan) Type (HERO / VILAN) (case-insensitive)"
+// @Success 200 {array} Super "List of Supers"
+// @Failure 400 {object} errorResponseJSON "Error parsing payload"
+// @Router /supers [get]
+func (api *SuperAPI) SupersGETFiltersHandler(c *gin.Context) {
 	sFilter := Super{}
 
 	if err := c.ShouldBind(&sFilter); err != nil {
@@ -129,7 +139,6 @@ func (api *SuperAPI) supersGETFiltersHandler(c *gin.Context) {
 		})
 	} else {
 		results := sFilter.ReadAll(api.DB)
-
 		c.JSON(http.StatusOK, results)
 	}
 }
@@ -263,8 +272,8 @@ func setRoutes(s *Server) *gin.Engine {
 		v1.POST("/super-hero", api.superHeroPOSTHandler)
 		v1.POST("/super-vilan", api.superVilanPOSTHandler)
 
-		v1.POST("/supers", api.supersPOSTHandler)
-		v1.GET("/supers", api.supersGETFiltersHandler)
+		v1.POST("/supers", api.SupersPOSTHandler)
+		v1.GET("/supers", api.SupersGETFiltersHandler)
 		v1.GET("/supers/:id", api.supersGETByIDHandler)
 		v1.PUT("/supers/:id", api.supersPUTHandler)
 		v1.DELETE("/supers/:id", api.supersDeleteHandler)
