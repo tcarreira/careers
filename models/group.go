@@ -86,16 +86,19 @@ func (g *Group) Create(db *pg.DB) (*Group, error) {
 		panic(err)
 	}
 
+	g.SupersList = make([]string, 0) // empty array instead of null
+
 	var minorErrors []string
-	for _, super := range g.Supers {
-		var s *Super
+	for i := range g.Supers {
 		var err error
+		s := &(g.Supers[i])
 
 		// Get Super from DB
-		s, err = super.GetByNameOrUUID(db, super.Name)
+		superName := s.Name // we need to keep the name in case of entity not found
+		s, err = s.GetByNameOrUUID(db, superName)
 		if err != nil {
 			minorErrors = append(minorErrors,
-				"(super:'"+super.Name+"') "+err.Error(),
+				"(super:'"+superName+"') "+err.Error(),
 			)
 		} else {
 			if err = db.Insert(&GroupSuper{
@@ -105,6 +108,9 @@ func (g *Group) Create(db *pg.DB) (*Group, error) {
 				Super:   s,
 			}); err != nil {
 				minorErrors = append(minorErrors, err.Error())
+			} else {
+				// Really commited the transaction
+				g.SupersList = append(g.SupersList, s.Name)
 			}
 		}
 	}

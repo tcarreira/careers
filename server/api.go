@@ -292,6 +292,7 @@ type GroupAPI struct {
 // @Param super body models.Group true "Group definition. Supers is a list os their names"
 // @Success 201 {object} models.Group "Group was created"
 // @Failure 409 {object} errorResponseJSON "Group name already exists"
+// @Failure 500 {object} errorResponseJSON "Unexpected Error"
 // @Router /groups [post]
 func (api *GroupAPI) GroupsPOSTHandler(c *gin.Context) {
 	group := models.Group{}
@@ -312,8 +313,12 @@ func (api *GroupAPI) GroupsPOSTHandler(c *gin.Context) {
 			})
 		} else if _, ok := err.(*models.ErrorGroupSuperRelation); ok {
 			log.Println("Found some non-fatal errors. Will log and ignore:", err.Error())
+			c.JSON(http.StatusCreated, group)
 		} else {
-			panic(err)
+			c.JSON(http.StatusInternalServerError, errorResponseJSON{
+				"Unexpected Error",
+				err.Error(),
+			})
 		}
 	} else {
 		c.JSON(http.StatusCreated, group)
