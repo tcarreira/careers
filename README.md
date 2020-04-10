@@ -1,7 +1,14 @@
 # superhero
+![GoReportCard](https://goreportcard.com/badge/github.com/tcarreira/superhero)
+![Build](https://github.com/tcarreira/superhero/workflows/Go/badge.svg
+)
+
 SuperHero API - Go (inspired by superheroapi.com)
 
 This is being made in the context of https://github.com/levpay/careers#desafio
+
+
+
 
 
 # Running
