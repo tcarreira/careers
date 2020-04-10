@@ -95,6 +95,8 @@ func parseCommandLine(comm CommandLiner, d *pg.DB) {
 				switch comm.getArg(2) {
 				case "schema":
 					db.CreateSchema(d)
+				case "drop":
+					db.DropSchema(d)
 				case "migrate":
 					db.Migrate(d)
 				default:
