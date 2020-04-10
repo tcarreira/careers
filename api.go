@@ -26,10 +26,13 @@ import (
 
 // SuperHandler interface for REST API for Super
 type SuperHandler interface {
-	supersPOSTHandler(c *gin.Context)
-	supersGETHandler(c *gin.Context)
+	superHeroPOSTHandler(c *gin.Context)
+	superVilanPOSTHandler(c *gin.Context)
+	SupersPOSTHandler(c *gin.Context)
+	SupersGETFiltersHandler(c *gin.Context)
+	SupersGETByIDHandler(c *gin.Context)
 	supersPUTHandler(c *gin.Context)
-	supersDeleteHandler(c *gin.Context)
+	SupersDeleteHandler(c *gin.Context)
 }
 
 // SuperAPI implements SuperHandler interface
