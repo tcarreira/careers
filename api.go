@@ -26,12 +26,12 @@ import (
 
 // SuperHandler interface for REST API for Super
 type SuperHandler interface {
-	superHeroPOSTHandler(c *gin.Context)
-	superVilanPOSTHandler(c *gin.Context)
+	SuperHeroPOSTHandler(c *gin.Context)
+	SuperVilanPOSTHandler(c *gin.Context)
 	SupersPOSTHandler(c *gin.Context)
 	SupersGETFiltersHandler(c *gin.Context)
 	SupersGETByIDHandler(c *gin.Context)
-	supersPUTHandler(c *gin.Context)
+	SupersPUTHandler(c *gin.Context)
 	SupersDeleteHandler(c *gin.Context)
 }
 
@@ -74,7 +74,21 @@ func (api *SuperAPI) handleSuperBindingJSON(c *gin.Context) (*Super, bool) {
 	return &super, true
 }
 
-func (api *SuperAPI) superHeroPOSTHandler(c *gin.Context) {
+type exampleSuperHeroVilanJSON struct {
+	Name string `json:"name" example:"name1"`
+}
+
+// SuperHeroPOSTHandler Create new SuperHero
+// ---
+// @Summary Create new Super Hero
+// @Description Create new Super Hero by name
+// @Accept  json
+// @Produce  json
+// @Param super body exampleSuperHeroVilanJSON true "super hero name"
+// @Success 201 {object} Super "Super was created"
+// @Failure 409 {object} errorResponseJSON "Super already exists"
+// @Router /super-hero [post]
+func (api *SuperAPI) SuperHeroPOSTHandler(c *gin.Context) {
 
 	super, ok := api.handleSuperBindingJSON(c)
 	if !ok {
@@ -85,7 +99,17 @@ func (api *SuperAPI) superHeroPOSTHandler(c *gin.Context) {
 	api.handleSuperCreate(c, super)
 }
 
-func (api *SuperAPI) superVilanPOSTHandler(c *gin.Context) {
+// SuperVilanPOSTHandler Create new Super Vilan
+// ---
+// @Summary Create new Super Vilan
+// @Description Create new Super Vilan by name
+// @Accept  json
+// @Produce  json
+// @Param super body exampleSuperHeroVilanJSON true "super vilan name"
+// @Success 201 {object} Super "Super was created"
+// @Failure 409 {object} errorResponseJSON "Super already exists"
+// @Router /super-vilan [post]
+func (api *SuperAPI) SuperVilanPOSTHandler(c *gin.Context) {
 
 	super, ok := api.handleSuperBindingJSON(c)
 	if !ok {
@@ -96,7 +120,7 @@ func (api *SuperAPI) superVilanPOSTHandler(c *gin.Context) {
 	api.handleSuperCreate(c, super)
 }
 
-type exampleSuperHeroVilanJSON struct {
+type exampleSuperJSON struct {
 	Type string `json:"type" example:"HERO"`
 	Name string `json:"name" example:"name1"`
 }
@@ -107,10 +131,10 @@ type exampleSuperHeroVilanJSON struct {
 // @Description Create new Super
 // @Accept  json
 // @Produce  json
-// @Param super body exampleSuperHeroVilanJSON true "super hero name"
+// @Param super body exampleSuperJSON true "super hero (mandatory: name and type)"
 // @Success 201 {object} Super "Super was created"
 // @Failure 409 {object} errorResponseJSON "Super already exists"
-// @Router /super-hero [post]
+// @Router /supers [post]
 func (api *SuperAPI) SupersPOSTHandler(c *gin.Context) {
 
 	super, ok := api.handleSuperBindingJSON(c)
@@ -291,13 +315,13 @@ func setRoutes(s *Server) *gin.Engine {
 			Router: s.Router,
 		}
 
-		v1.POST("/super-hero", api.superHeroPOSTHandler)
-		v1.POST("/super-vilan", api.superVilanPOSTHandler)
+		v1.POST("/super-hero", api.SuperHeroPOSTHandler)
+		v1.POST("/super-vilan", api.SuperVilanPOSTHandler)
 
 		v1.POST("/supers", api.SupersPOSTHandler)
 		v1.GET("/supers", api.SupersGETFiltersHandler)
 		v1.GET("/supers/:id", api.SupersGETByIDHandler)
-		v1.PUT("/supers/:id", api.supersPUTHandler)
+		v1.PUT("/supers/:id", api.SupersPUTHandler)
 		v1.DELETE("/supers/:id", api.SupersDeleteHandler)
 
 		v1.POST("/groups", api.groupsPOSTHandler)
