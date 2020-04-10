@@ -280,6 +280,15 @@ type GroupAPI struct {
 }
 
 // GroupsPOSTHandler Create Group
+// ---
+// @Summary Create new Group of Supers
+// @Description Create new Group of Supers
+// @Accept  json
+// @Produce  json
+// @Param super body models.Group true "Group definition. Supers is a list os their names"
+// @Success 201 {object} models.Group "Group was created"
+// @Failure 409 {object} errorResponseJSON "Group name already exists"
+// @Router /groups [post]
 func (api *GroupAPI) GroupsPOSTHandler(c *gin.Context) {
 	group := models.Group{}
 
@@ -309,6 +318,15 @@ func (api *GroupAPI) GroupsPOSTHandler(c *gin.Context) {
 }
 
 // GroupsGETHandler Get a Group
+// ---
+// @Summary Get Group
+// @Description Get Group by name
+// @Produce json
+// @Param name path string true "Group Name"
+// @Success 200 {object} models.Group "Group"
+// @Failure 404 {object} errorResponseJSON "Group Not Found"
+// @Failure 500 {object} errorResponseJSON "Unexpected Error"
+// @Router /groups/{name} [get]
 func (api *GroupAPI) GroupsGETHandler(c *gin.Context) {
 	var group *models.Group
 	var err error
