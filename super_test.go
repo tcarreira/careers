@@ -336,4 +336,21 @@ func TestSuper_GroupsRelatives(t *testing.T) {
 
 	})
 
+	t.Run("TestSuper_GroupsRelatives - Marshal Super JSON", func(t *testing.T) {
+		// This test is very prone to errors
+		// special attention to "relatives_count": and "groups":
+		super := &Super{Name: supers[0].Name}
+		superList := super.ReadAll(s.DB)
+
+		var superListJSON []byte
+		superListJSON, err := json.Marshal(superList)
+
+		assert.NoError(t, err)
+		assert.Equal(t,
+			string(`[{"uuid":"41f0bc0e-89f7-4ea7-a4f5-9d08e5383b9c","type":"HERO","name":"main","fullname":"","intelligence":"0","power":"0","occupation":"","image_url":"","groups":["g1","g3"],"relatives_count":"3"}]`),
+			string(superListJSON),
+		)
+
+	})
+
 }

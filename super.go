@@ -132,15 +132,15 @@ func (s *Super) ReadAll(db *pg.DB) []Super {
 
 		// Specs state filter only by Name and UUID
 		if s.Type != "" {
-			q = q.Where("upper(type) = ?", strings.ToUpper(s.Type))
+			q = q.Where("upper(s.type) = ?", strings.ToUpper(s.Type))
 		}
 		if s.Name != "" {
 			// must match case
-			q = q.Where("name = ?", s.Name)
+			q = q.Where("s.name = ?", s.Name)
 		}
 		if s.UUID != "" {
 			// postgres uuid is already case insensitive
-			q = q.Where("upper(uuid::text) = ?", strings.ToUpper(s.UUID))
+			q = q.Where("upper(s.uuid::text) = ?", strings.ToUpper(s.UUID))
 		}
 
 		// TODO: add other fields
@@ -151,11 +151,26 @@ func (s *Super) ReadAll(db *pg.DB) []Super {
 	// supersResult=[] instead of supersResult=nil
 	supersResult := make([]Super, 0)
 
-	err := db.Model(&supersResult).
+	err := db.Model(&supersResult).TableExpr("supers AS s").
+		Relation("Groups").
+		Column("s.*").ColumnExpr("count(distinct relatives.id) AS relatives_count").
+		Join("LEFT JOIN group_supers AS s2g ON s.id = s2g.super_id").
+		Join("LEFT JOIN group_supers AS g2s ON s2g.group_id = g2s.group_id").
+		Join("LEFT JOIN supers AS relatives ON g2s.super_id = relatives.id AND g2s.super_id != s.id").
 		Apply(filter).
+		Group("s.id").
 		Select()
 	if err != nil {
 		panic(err)
+	}
+
+	for i := range supersResult {
+
+		// create the Group Names List as []string
+		for _, group := range supersResult[i].Groups {
+			supersResult[i].GroupsList = append(supersResult[i].GroupsList, group.Name)
+		}
+
 	}
 
 	return supersResult
